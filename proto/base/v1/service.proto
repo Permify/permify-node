@@ -1,0 +1,423 @@
+syntax = "proto3";
+package base.v1;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/Permify/permify/pkg/pb/base/v1";
+
+import "base/v1/tuple.proto";
+import "base/v1/schema.proto";
+import "validate/validate.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+// ** PERMISSION SERVICE **
+
+// Permission
+service Permission {
+  rpc Check(PermissionCheckRequest) returns (PermissionCheckResponse) {
+    option (google.api.http) = {
+      post: "/v1/permissions/check"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "This method returns a decision about whether user can perform an action on a certain resource. For example, Can the user 1 push to repository 1?"
+      tags: [
+        "Permission"
+      ]
+      operation_id: "permissions.check"
+    };
+  }
+
+  rpc Expand(PermissionExpandRequest) returns (PermissionExpandResponse) {
+    option (google.api.http) = {
+      post: "/v1/permissions/expand"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "expand relationships according to schema"
+      tags: [
+        "Permission"
+      ]
+      operation_id: "permissions.expand"
+    };
+  }
+
+  rpc LookupSchema(PermissionLookupSchemaRequest) returns (PermissionLookupSchemaResponse) {
+    option (google.api.http) = {
+      post: "/v1/permissions/lookup-schema"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: ""
+      tags: [
+        "Permission"
+      ]
+      operation_id: "permissions.lookupSchema"
+    };
+  }
+
+  rpc LookupEntity(PermissionLookupEntityRequest) returns (PermissionLookupEntityResponse) {
+    option (google.api.http) = {
+      post: "/v1/permissions/lookup-entity"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: ""
+      tags: [
+        "Permission"
+      ]
+      operation_id: "permissions.lookupEntity"
+    };
+  }
+
+  rpc LookupEntityStream(PermissionLookupEntityRequest) returns (stream PermissionLookupEntityStreamResponse) {
+    option (google.api.http) = {
+      post: "/v1/permissions/lookup-entity-stream"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: ""
+      tags: [
+        "Permission"
+      ]
+      operation_id: "permissions.lookupEntityStream"
+    };
+  }
+}
+
+// CHECK
+
+// CheckRequest
+message PermissionCheckRequest {
+  PermissionCheckRequestMetadata metadata = 1 [json_name = "metadata"];
+
+  Entity entity = 2 [json_name = "entity", (validate.rules).message.required = true];
+
+  // its can be action or relation
+  string permission = 3 [json_name = "permission", (validate.rules).string = {
+    pattern : "^([a-z][a-z0-9_]{1,62}[a-z0-9])$",
+    max_bytes : 64,
+    ignore_empty: false,
+  }];
+
+  Subject subject = 4 [json_name = "subject", (validate.rules).message.required = true];
+}
+
+// PermissionCheckRequestMetadata
+message PermissionCheckRequestMetadata {
+  string schema_version = 1 [json_name = "schema_version"];
+  string snap_token = 2 [json_name = "snap_token"];
+  bool exclusion = 3 [json_name = "exclusion"];
+  int32 depth = 4 [json_name = "depth", (validate.rules).int32.gte = 3];
+}
+
+// PermissionCheckResponse
+message PermissionCheckResponse {
+  // Result
+  enum Result {
+    RESULT_UNKNOWN = 0;
+    RESULT_ALLOWED = 1;
+    RESULT_DENIED = 2;
+  }
+
+  Result can = 1 [json_name = "can"];
+  PermissionCheckResponseMetadata metadata = 2 [json_name = "metadata"];
+}
+
+// CheckResponseMetadata
+message PermissionCheckResponseMetadata {
+  int32 check_count = 1 [json_name = "check_count"];
+}
+
+// EXPAND
+
+// PermissionExpandRequest
+message PermissionExpandRequest {
+  PermissionExpandRequestMetadata metadata = 1 [json_name = "metadata"];
+
+  Entity entity = 2 [json_name = "entity", (validate.rules).message.required = true];
+
+  string permission = 3 [json_name = "permission", (validate.rules).string = {
+    pattern : "^([a-z][a-z0-9_]{1,62}[a-z0-9])$",
+    max_bytes : 64,
+    ignore_empty: true,
+  }];
+}
+
+// ExpandRequestMetadata
+message PermissionExpandRequestMetadata {
+  string schema_version = 1 [json_name = "schema_version"];
+  string snap_token = 2 [json_name = "snap_token"];
+}
+
+// PermissionExpandResponse
+message PermissionExpandResponse {
+  Expand tree = 1 [json_name = "tree"];
+}
+
+//LOOKUP
+
+// PermissionLookupSchemaRequest
+message PermissionLookupSchemaRequest {
+  PermissionLookupSchemaRequestMetadata metadata = 1 [json_name = "metadata"];
+
+  string entity_type = 2 [json_name = "entity_type", (validate.rules).string = {
+    pattern : "^([a-z][a-z0-9_]{1,62}[a-z0-9])$",
+    max_bytes : 64,
+    ignore_empty: false,
+  }];
+
+  repeated string relation_names = 3 [json_name = "relation_names"];
+}
+
+// LookupSchemaRequestMetadata
+message PermissionLookupSchemaRequestMetadata {
+  string schema_version = 1 [json_name = "schema_version"];
+}
+
+// PermissionLookupSchemaResponse
+message PermissionLookupSchemaResponse {
+  repeated string action_names = 1 [json_name = "action_names"];
+}
+
+// PermissionLookupEntityRequest
+message PermissionLookupEntityRequest {
+  PermissionLookupEntityRequestMetadata metadata = 1 [json_name = "metadata"];
+
+  string entity_type = 2 [json_name = "entity_type", (validate.rules).string = {
+    pattern : "^([a-z][a-z0-9_]{1,62}[a-z0-9])$",
+    max_bytes : 64,
+    ignore_empty: false,
+  }];
+
+  string permission = 3 [json_name = "permission", (validate.rules).string = {
+    pattern : "^([a-z][a-z0-9_]{1,62}[a-z0-9])$",
+    max_bytes : 64,
+    ignore_empty: false,
+  }];
+
+  Subject subject = 4 [json_name = "subject", (validate.rules).message.required = true];
+}
+
+// LookupEntityRequestMetadata
+message PermissionLookupEntityRequestMetadata {
+  string schema_version = 1 [json_name = "schema_version"];
+  string snap_token = 2 [json_name = "snap_token"];
+  int32 depth = 3 [json_name = "depth", (validate.rules).int32.gte = 3];
+}
+
+// PermissionLookupEntityResponse
+message PermissionLookupEntityResponse {
+  repeated string entity_ids = 1 [json_name = "entity_ids"];
+}
+
+// PermissionLookupEntityStreamResponse
+message PermissionLookupEntityStreamResponse {
+  string entity_id = 1 [json_name = "entity_id"];
+}
+
+// ** SCHEMA SERVICE **
+
+// Schema
+service Schema {
+  rpc Write(SchemaWriteRequest) returns (SchemaWriteResponse) {
+    option (google.api.http) = {
+      post: "/v1/schemas/write"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "write your authorization model"
+      tags: [
+        "Schema"
+      ]
+      operation_id: "schemas.write"
+    };
+  }
+
+  rpc Read(SchemaReadRequest) returns (SchemaReadResponse) {
+    option (google.api.http) = {
+      post: "/v1/schemas/read"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "read your authorization model"
+      tags: [
+        "Schema"
+      ]
+      operation_id: "schemas.read"
+    };
+  }
+}
+
+// WRITE
+
+// SchemaWriteRequest
+message SchemaWriteRequest {
+  string schema = 1 [json_name = "schema"];
+}
+
+// SchemaWriteResponse
+message SchemaWriteResponse {
+  string schema_version = 1 [json_name = "schema_version"];
+}
+
+// READ
+
+// SchemaReadRequest
+message SchemaReadRequest {
+  SchemaReadRequestMetadata metadata = 1 [json_name = "metadata"];
+}
+
+// LookupSchemaRequestMetadata
+message SchemaReadRequestMetadata {
+  string schema_version = 1 [json_name = "schema_version"];
+}
+
+// SchemaReadRequest
+message SchemaReadResponse {
+  IndexedSchema schema = 1 [json_name = "schema"];
+}
+
+// ** RELATIONSHIP SERVICE **
+
+// Schema
+service Relationship {
+  rpc Write(RelationshipWriteRequest) returns (RelationshipWriteResponse) {
+    option (google.api.http) = {
+      post: "/v1/relationships/write"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "create new relation tuple"
+      tags: [
+        "Relationship"
+      ]
+      operation_id: "relationships.write"
+    };
+  }
+
+  rpc Read(RelationshipReadRequest) returns (RelationshipReadResponse) {
+    option (google.api.http) = {
+      post: "/v1/relationships/read"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "read relation tuple(s)"
+      tags: [
+        "Relationship"
+      ]
+      operation_id: "relationships.read"
+    };
+  }
+
+  rpc Delete(RelationshipDeleteRequest) returns (RelationshipDeleteResponse) {
+    option (google.api.http) = {
+      post: "/v1/relationships/delete"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "delete relation tuple"
+      tags: [
+        "Relationship"
+      ]
+      operation_id: "relationships.delete"
+    };
+  }
+}
+
+// RelationshipWriteRequest
+message RelationshipWriteRequest {
+  RelationshipWriteRequestMetadata metadata = 1 [json_name = "metadata"];
+
+  repeated Tuple tuples = 2 [json_name = "tuples", (validate.rules).repeated = {
+    min_items : 1,
+    max_items : 100,
+    items : {
+      message : {
+        required : true,
+      },
+    },
+  }];
+}
+
+// RelationshipWriteRequestMetadata
+message RelationshipWriteRequestMetadata {
+  string schema_version = 1 [json_name = "schema_version"];
+}
+
+// RelationshipWriteResponse
+message RelationshipWriteResponse {
+  string snap_token = 1 [json_name = "snap_token"];
+}
+
+// RelationshipReadRequest
+message RelationshipReadRequest {
+  RelationshipReadRequestMetadata metadata = 1 [json_name = "metadata"];
+
+  TupleFilter filter = 2 [json_name = "filter"];
+}
+
+// RelationshipWriteRequestMetadata
+message RelationshipReadRequestMetadata {
+  string snap_token = 1 [json_name = "snap_token"];
+}
+
+// RelationshipReadResponse
+message RelationshipReadResponse {
+  repeated Tuple tuples = 1 [json_name = "tuples"];
+}
+
+// RelationshipDeleteRequest
+message RelationshipDeleteRequest {
+  TupleFilter filter = 1 [json_name = "filter"];
+}
+
+// RelationshipDeleteResponse
+message RelationshipDeleteResponse {
+  string snap_token = 1 [json_name = "snap_token"];
+}
+
+// ** WELCOME SERVICE **
+service Welcome {
+  rpc Hello(google.protobuf.Empty) returns (welcomeResponse) {
+    option (google.api.http) = {
+      get: "/"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "welcome to permify"
+      tags: [
+        "Welcome"
+      ]
+      operation_id: "welcome.hello"
+    };
+  }
+}
+
+// WelcomeResponse
+message welcomeResponse {
+  message Sources {
+    string docs = 1;
+    string gitHub = 2;
+    string blog = 3;
+  }
+  message Socials {
+    string discord = 1;
+    string twitter = 2;
+    string linkedin = 3;
+  }
+
+  string permify = 1;
+  Sources sources = 2;
+  Socials socials = 3;
+}

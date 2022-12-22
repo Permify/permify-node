@@ -1,0 +1,37 @@
+{
+  "name": "@permify/permify-node",
+  "version": "0.1.0",
+  "description": "permify nodejs client",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "private": false,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "permissions",
+    "access-control",
+    "rebac",
+    "fga",
+    "fine-grained-authorization",
+    "zanzibar",
+    "grpc"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.8.0",
+    "@protobuf-ts/plugin": "^2.8.2",
+    "long": "^5.2.1",
+    "nice-grpc": "^2.0.1",
+    "nice-grpc-common": "^2.0.0",
+    "protobufjs": "^7.1.2",
+    "protoc-gen-ts": "^0.8.5",
+    "ts-protoc-gen": "^0.15.0"
+  },
+  "devDependencies": {
+    "grpc-tools": "^1.12.3",
+    "grpc_tools_node_protoc_ts": "^5.3.2",
+    "ts-proto": "^1.136.1"
+  }
+}
