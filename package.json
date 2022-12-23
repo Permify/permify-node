@@ -6,7 +6,12 @@
   "types": "dist/src/index.d.ts",
   "private": false,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "only-run-tests": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json",
+    "buf": "./buf.gen.yaml",
+    "lint": "./node_modules/.bin/eslint src",
+    "build": "tsc",
+    "prepublish": "yarn build",
+    "build-js-client": "tsc --target es2018 --declaration false --outDir js-dist"
   },
   "keywords": [
     "permissions",
@@ -17,21 +22,30 @@
     "zanzibar",
     "grpc"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "permify",
+  "license": "Apache-2.0",
   "dependencies": {
     "@grpc/grpc-js": "^1.8.0",
     "@protobuf-ts/plugin": "^2.8.2",
     "long": "^5.2.1",
     "nice-grpc": "^2.0.1",
     "nice-grpc-common": "^2.0.0",
+    "node-rsa": "^1.1.1",
     "protobufjs": "^7.1.2",
     "protoc-gen-ts": "^0.8.5",
-    "ts-protoc-gen": "^0.15.0"
+    "ts-protoc-gen": "^0.15.0",
+    "tsc-silent": "^1.2.2"
   },
   "devDependencies": {
+    "@types/jasmine": "^4.3.1",
+    "@types/jest": "^29.2.4",
+    "@types/node-rsa": "^1.1.1",
+    "ava": "^5.1.0",
     "grpc-tools": "^1.12.3",
     "grpc_tools_node_protoc_ts": "^5.3.2",
-    "ts-proto": "^1.136.1"
+    "jasmine": "^4.5.0",
+    "ts-node": "^10.9.1",
+    "ts-proto": "^1.136.1",
+    "typescript": "^4.9.4"
   }
 }
