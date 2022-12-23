@@ -1,0 +1,5 @@
+services:
+  permify:
+    image: "ghcr.io/permify/permify:latest"
+    ports: ['3478:3478']
+    command: "serve"
