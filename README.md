@@ -8,6 +8,20 @@
     <a href="https://discord.gg/MJbUjwskdH" target="_blank"><img src="https://img.shields.io/discord/950799928047833088?style=for-the-badge&logo=discord&label=DISCORD" alt="Permify Discord Channel" /></a>&nbsp;
 </p>
 
+# Installation
+Use npm to install: 
+
+```shell
+npm install @permify/permify-node
+```
+Use yarn to install:
+
+```shell
+yarn add @permify/permify-node
+```
+
+# How to use
+
 ### Write Schema
 ```typescript
 let client = newClient({
