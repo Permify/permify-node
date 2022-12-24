@@ -124,7 +124,7 @@ function main() {
     let res = client.permission.lookupEntityStream({
         metadata: {
             snapToken: "",
-            schemaVersion: swResponse.schemaVersion,
+            schemaVersion: "",
             depth: 20
         },
         entityType: "document",
@@ -143,6 +143,34 @@ async function handle(res: AsyncIterable<PermissionLookupEntityStreamResponse>) 
         // response.entityId
     }
 }
+```
+
+### Interceptors
+
+#### Access Token Interceptor
+
+```typescript
+const permify = require("@permify/permify-node");
+const {newAccessTokenInterceptor} = require("@permify/permify-node/dist/src/grpc");
+
+const client = new permify.grpc.newClient({
+    endpoint: "localhost:3478",
+}, newAccessTokenInterceptor("YOUR_TOKEN"))
+```
+
+### Certs
+
+```typescript
+import {grpc as permifyGrpcClient} from "@permify/permify-node";
+import {newAccessTokenInterceptor} from "@permify/permify-node/dist/src/grpc";
+import fs from 'fs';
+
+const cert = fs.readFileSync('path/to/cert.pem');
+
+const client = new permifyGrpcClient.newClient({
+    endpoint: "localhost:3478",
+    cert: cert,
+}, newAccessTokenInterceptor("YOUR_TOKEN"))
 ```
 
 Permify is an **open-source authorization service** for creating and maintaining fine-grained authorizations accross
