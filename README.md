@@ -29,7 +29,6 @@ yarn add @permify/permify-node
 
 ```typescript
 const permify = require("@permify/permify-node");
-const {PermissionCheckResponse_Result} = require("@permify/permify-node/dist/src/grpc/generated/base/v1/service");
 
 const client = new permify.grpc.newClient({
     endpoint: "localhost:3478",
@@ -52,7 +51,6 @@ client.schema.write({
 
 ```typescript
 const permify = require("@permify/permify-node");
-const {PermissionCheckResponse_Result} = require("@permify/permify-node/dist/src/grpc/generated/base/v1/service");
 
 const client = new permify.grpc.newClient({
     endpoint: "localhost:3478",
