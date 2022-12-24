@@ -10,11 +10,13 @@
 </p>
 
 # Installation
-Use npm to install: 
+
+Use npm to install:
 
 ```shell
 npm install @permify/permify-node
 ```
+
 Use yarn to install:
 
 ```shell
@@ -24,10 +26,13 @@ yarn add @permify/permify-node
 # How to use
 
 ### Write Schema
+
 ```typescript
-let client = newClient({
+const permify = require("@permify/permify-node");
+const {PermissionCheckResponse_Result} = require("@permify/permify-node/dist/src/grpc/generated/base/v1/service");
+
+const client = new permify.grpc.newClient({
     endpoint: "localhost:3478",
-    cert: null
 })
 
 client.schema.write({
@@ -44,10 +49,18 @@ client.schema.write({
 ```
 
 ### Write Relationships
+
 ```typescript
- client.relationship.write({
+const permify = require("@permify/permify-node");
+const {PermissionCheckResponse_Result} = require("@permify/permify-node/dist/src/grpc/generated/base/v1/service");
+
+const client = new permify.grpc.newClient({
+    endpoint: "localhost:3478",
+})
+
+client.relationship.write({
     metadata: {
-        schemaVersion: swResponse.schemaVersion
+        schemaVersion: ""
     },
     tuples: [{
         entity: {
@@ -59,17 +72,26 @@ client.schema.write({
             type: "user",
             id: "1"
         }
-    }]}).then((response) => {
-        // handle response
-    })
+    }]
+}).then((response) => {
+    // handle response
+})
 ```
 
 ### Check
+
 ```typescript
- client.permission.check({
+const permify = require("@permify/permify-node");
+const {PermissionCheckResponse_Result} = require("@permify/permify-node/dist/src/grpc/generated/base/v1/service");
+
+const client = new permify.grpc.newClient({
+    endpoint: "localhost:3478",
+})
+
+client.permission.check({
     metadata: {
         snapToken: "",
-        schemaVersion: response.schemaVersion,
+        schemaVersion: "",
         depth: 20
     },
     entity: {
@@ -82,40 +104,51 @@ client.schema.write({
         id: "3"
     }
 }).then((response) => {
-    if (response.can == permissionCheckResponse_Result.RESULT_ALLOWED){
-        // allowed
+    if (response.can === PermissionCheckResponse_Result.RESULT_ALLOWED) {
+        console.log("RESULT_ALLOWED")
+    } else {
+        console.log("RESULT_DENIED")
     }
 })
 ```
 
 ### Streaming Calls
-```typescript
- let res = client.permission.lookupEntityStream({
-    metadata: {
-        snapToken: "",
-        schemaVersion: swResponse.schemaVersion,
-        depth: 20
-    },
-    entityType: "document",
-    permission: "view",
-    subject: {
-        type: "user",
-        id: "1"
-    }
-})
-
-handle(res)
-```
 
 ```typescript
+const permify = require("@permify/permify-node");
+const {PermissionLookupEntityStreamResponse} = require("@permify/permify-node/dist/src/grpc/generated/base/v1/service");
+
+function main() {
+    const client = new permify.grpc.newClient({
+        endpoint: "localhost:3478",
+    })
+
+    let res = client.permission.lookupEntityStream({
+        metadata: {
+            snapToken: "",
+            schemaVersion: swResponse.schemaVersion,
+            depth: 20
+        },
+        entityType: "document",
+        permission: "view",
+        subject: {
+            type: "user",
+            id: "1"
+        }
+    })
+
+    handle(res)
+}
+
 async function handle(res: AsyncIterable<PermissionLookupEntityStreamResponse>) {
     for await (const response of res) {
-        // response.entityId 
+        // response.entityId
     }
 }
 ```
 
-Permify is an **open-source authorization service** for creating and maintaining fine-grained authorizations accross your individual applications and services.
+Permify is an **open-source authorization service** for creating and maintaining fine-grained authorizations accross
+your individual applications and services.
 
 * [Permify website](https://permify.co)
 * [Permify documentation](https://docs.permify.co/docs/intro)
@@ -123,7 +156,9 @@ Permify is an **open-source authorization service** for creating and maintaining
 * [Permify GitHub Repository](https://github.com/Permify/permify)
 
 ## Community & Support
-Join our [Discord channel](https://discord.gg/MJbUjwskdH) for issues, feature requests, feedbacks or anything else. We love to talk about authorization and access control :heart:
+
+Join our [Discord channel](https://discord.gg/MJbUjwskdH) for issues, feature requests, feedbacks or anything else. We
+love to talk about authorization and access control :heart:
 
 <p align="left">
 <a href="https://discord.gg/MJbUjwskdH">
