@@ -9,7 +9,7 @@
     <a href="https://discord.gg/MJbUjwskdH" target="_blank"><img src="https://img.shields.io/discord/950799928047833088?style=for-the-badge&logo=discord&label=DISCORD" alt="Permify Discord Channel" /></a>&nbsp;
 </p>
 
-This Client makes it easy to interact with [Permify](https://github.com/Permify/permify) from your Node.js application.
+This client makes it easy to interact with [Permify](https://github.com/Permify/permify) from your Node.js application.
 
 # Installation
 
