@@ -179,7 +179,7 @@ Permify is an **open-source authorization service** for creating and maintaining
 your individual applications and services.
 
 * [Permify website](https://permify.co)
-* [Permify documentation](https://docs.permify.co/docs/intro)
+* [Permify documentation](https://docs.permify.co/docs)
 * [Permify playground](https://play.permify.co)
 * [Permify GitHub Repository](https://github.com/Permify/permify)
 
