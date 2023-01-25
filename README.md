@@ -37,6 +37,7 @@ const client = new permify.grpc.newClient({
 })
 
 client.schema.write({
+    tenantId: "t1",
     schema: `
     entity user {}
     entity document {
@@ -59,6 +60,7 @@ const client = new permify.grpc.newClient({
 })
 
 client.relationship.write({
+    tenantId: "t1",
     metadata: {
         schemaVersion: ""
     },
@@ -89,6 +91,7 @@ const client = new permify.grpc.newClient({
 })
 
 client.permission.check({
+    tenantId: "t1",
     metadata: {
         snapToken: "",
         schemaVersion: "",
@@ -124,6 +127,7 @@ function main() {
     })
 
     let res = client.permission.lookupEntityStream({
+        tenantId: "t1",
         metadata: {
             snapToken: "",
             schemaVersion: "",
