@@ -13,6 +13,7 @@ describe("clients test", () => {
         })
 
         client.schema.write({
+            tenantId: "t1",
             schema: `
             entity user {}
             
@@ -24,6 +25,7 @@ describe("clients test", () => {
             `
         }).then((response) => {
             client.permission.check({
+                tenantId: "t1",
                 metadata: {
                     snapToken: "",
                     schemaVersion: response.schemaVersion,
@@ -52,6 +54,7 @@ describe("clients test", () => {
         })
 
         client.schema.write({
+            tenantId: "t1",
             schema: `
             entity user {}
             
@@ -63,6 +66,7 @@ describe("clients test", () => {
             `
         }).then((swResponse) => {
             client.relationship.write({
+                tenantId: "t1",
                 metadata: {
                     schemaVersion: swResponse.schemaVersion
                 },
@@ -99,6 +103,7 @@ describe("clients test", () => {
                 }]
             }).then((response) => {
                 let res = client.permission.lookupEntityStream({
+                    tenantId: "t1",
                     metadata: {
                         snapToken: response.snapToken,
                         schemaVersion: swResponse.schemaVersion,

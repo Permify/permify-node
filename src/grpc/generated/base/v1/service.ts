@@ -4,12 +4,13 @@ import type { CallContext, CallOptions } from "nice-grpc-common";
 import _m0 from "protobufjs/minimal";
 import { Empty } from "../../google/protobuf/empty";
 import { IndexedSchema } from "./schema";
-import { Entity, Expand, Subject, Tuple, TupleFilter } from "./tuple";
+import { Entity, Expand, Subject, Tenant, Tuple, TupleFilter } from "./tuple";
 
 export const protobufPackage = "base.v1";
 
-/** CheckRequest */
+/** PermissionCheckRequest */
 export interface PermissionCheckRequest {
+  tenantId: string;
   metadata: PermissionCheckRequestMetadata | undefined;
   entity:
     | Entity
@@ -80,12 +81,13 @@ export interface PermissionCheckResponseMetadata {
 
 /** PermissionExpandRequest */
 export interface PermissionExpandRequest {
+  tenantId: string;
   metadata: PermissionExpandRequestMetadata | undefined;
   entity: Entity | undefined;
   permission: string;
 }
 
-/** ExpandRequestMetadata */
+/** PermissionExpandRequestMetadata */
 export interface PermissionExpandRequestMetadata {
   schemaVersion: string;
   snapToken: string;
@@ -98,12 +100,13 @@ export interface PermissionExpandResponse {
 
 /** PermissionLookupSchemaRequest */
 export interface PermissionLookupSchemaRequest {
+  tenantId: string;
   metadata: PermissionLookupSchemaRequestMetadata | undefined;
   entityType: string;
   relationNames: string[];
 }
 
-/** LookupSchemaRequestMetadata */
+/** PermissionLookupSchemaRequestMetadata */
 export interface PermissionLookupSchemaRequestMetadata {
   schemaVersion: string;
 }
@@ -115,13 +118,14 @@ export interface PermissionLookupSchemaResponse {
 
 /** PermissionLookupEntityRequest */
 export interface PermissionLookupEntityRequest {
+  tenantId: string;
   metadata: PermissionLookupEntityRequestMetadata | undefined;
   entityType: string;
   permission: string;
   subject: Subject | undefined;
 }
 
-/** LookupEntityRequestMetadata */
+/** PermissionLookupEntityRequestMetadata */
 export interface PermissionLookupEntityRequestMetadata {
   schemaVersion: string;
   snapToken: string;
@@ -140,6 +144,7 @@ export interface PermissionLookupEntityStreamResponse {
 
 /** SchemaWriteRequest */
 export interface SchemaWriteRequest {
+  tenantId: string;
   schema: string;
 }
 
@@ -150,10 +155,11 @@ export interface SchemaWriteResponse {
 
 /** SchemaReadRequest */
 export interface SchemaReadRequest {
+  tenantId: string;
   metadata: SchemaReadRequestMetadata | undefined;
 }
 
-/** LookupSchemaRequestMetadata */
+/** SchemaReadRequestMetadata */
 export interface SchemaReadRequestMetadata {
   schemaVersion: string;
 }
@@ -165,6 +171,7 @@ export interface SchemaReadResponse {
 
 /** RelationshipWriteRequest */
 export interface RelationshipWriteRequest {
+  tenantId: string;
   metadata: RelationshipWriteRequestMetadata | undefined;
   tuples: Tuple[];
 }
@@ -181,8 +188,11 @@ export interface RelationshipWriteResponse {
 
 /** RelationshipReadRequest */
 export interface RelationshipReadRequest {
+  tenantId: string;
   metadata: RelationshipReadRequestMetadata | undefined;
   filter: TupleFilter | undefined;
+  pageSize: number;
+  continuousToken: string;
 }
 
 /** RelationshipWriteRequestMetadata */
@@ -193,16 +203,51 @@ export interface RelationshipReadRequestMetadata {
 /** RelationshipReadResponse */
 export interface RelationshipReadResponse {
   tuples: Tuple[];
+  continuousToken: string;
 }
 
 /** RelationshipDeleteRequest */
 export interface RelationshipDeleteRequest {
+  tenantId: string;
   filter: TupleFilter | undefined;
 }
 
 /** RelationshipDeleteResponse */
 export interface RelationshipDeleteResponse {
   snapToken: string;
+}
+
+/** TenantCreateRequest */
+export interface TenantCreateRequest {
+  id: string;
+  name: string;
+}
+
+/** TenantCreateResponse */
+export interface TenantCreateResponse {
+  tenant: Tenant | undefined;
+}
+
+/** TenantDeleteRequest */
+export interface TenantDeleteRequest {
+  id: string;
+}
+
+/** TenantDeleteResponse */
+export interface TenantDeleteResponse {
+  tenant: Tenant | undefined;
+}
+
+/** TenantListRequest */
+export interface TenantListRequest {
+  pageSize: number;
+  continuousToken: string;
+}
+
+/** TenantListResponse */
+export interface TenantListResponse {
+  tenants: Tenant[];
+  continuousToken: string;
 }
 
 /** WelcomeResponse */
@@ -225,22 +270,25 @@ export interface welcomeResponse_Socials {
 }
 
 function createBasePermissionCheckRequest(): PermissionCheckRequest {
-  return { metadata: undefined, entity: undefined, permission: "", subject: undefined };
+  return { tenantId: "", metadata: undefined, entity: undefined, permission: "", subject: undefined };
 }
 
 export const PermissionCheckRequest = {
   encode(message: PermissionCheckRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
     if (message.metadata !== undefined) {
-      PermissionCheckRequestMetadata.encode(message.metadata, writer.uint32(10).fork()).ldelim();
+      PermissionCheckRequestMetadata.encode(message.metadata, writer.uint32(18).fork()).ldelim();
     }
     if (message.entity !== undefined) {
-      Entity.encode(message.entity, writer.uint32(18).fork()).ldelim();
+      Entity.encode(message.entity, writer.uint32(26).fork()).ldelim();
     }
     if (message.permission !== "") {
-      writer.uint32(26).string(message.permission);
+      writer.uint32(34).string(message.permission);
     }
     if (message.subject !== undefined) {
-      Subject.encode(message.subject, writer.uint32(34).fork()).ldelim();
+      Subject.encode(message.subject, writer.uint32(42).fork()).ldelim();
     }
     return writer;
   },
@@ -253,15 +301,18 @@ export const PermissionCheckRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.metadata = PermissionCheckRequestMetadata.decode(reader, reader.uint32());
+          message.tenantId = reader.string();
           break;
         case 2:
-          message.entity = Entity.decode(reader, reader.uint32());
+          message.metadata = PermissionCheckRequestMetadata.decode(reader, reader.uint32());
           break;
         case 3:
-          message.permission = reader.string();
+          message.entity = Entity.decode(reader, reader.uint32());
           break;
         case 4:
+          message.permission = reader.string();
+          break;
+        case 5:
           message.subject = Subject.decode(reader, reader.uint32());
           break;
         default:
@@ -274,6 +325,7 @@ export const PermissionCheckRequest = {
 
   fromJSON(object: any): PermissionCheckRequest {
     return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
       metadata: isSet(object.metadata) ? PermissionCheckRequestMetadata.fromJSON(object.metadata) : undefined,
       entity: isSet(object.entity) ? Entity.fromJSON(object.entity) : undefined,
       permission: isSet(object.permission) ? String(object.permission) : "",
@@ -283,6 +335,7 @@ export const PermissionCheckRequest = {
 
   toJSON(message: PermissionCheckRequest): unknown {
     const obj: any = {};
+    message.tenantId !== undefined && (obj.tenant_id = message.tenantId);
     message.metadata !== undefined &&
       (obj.metadata = message.metadata ? PermissionCheckRequestMetadata.toJSON(message.metadata) : undefined);
     message.entity !== undefined && (obj.entity = message.entity ? Entity.toJSON(message.entity) : undefined);
@@ -293,6 +346,7 @@ export const PermissionCheckRequest = {
 
   fromPartial(object: DeepPartial<PermissionCheckRequest>): PermissionCheckRequest {
     const message = createBasePermissionCheckRequest();
+    message.tenantId = object.tenantId ?? "";
     message.metadata = (object.metadata !== undefined && object.metadata !== null)
       ? PermissionCheckRequestMetadata.fromPartial(object.metadata)
       : undefined;
@@ -492,19 +546,22 @@ export const PermissionCheckResponseMetadata = {
 };
 
 function createBasePermissionExpandRequest(): PermissionExpandRequest {
-  return { metadata: undefined, entity: undefined, permission: "" };
+  return { tenantId: "", metadata: undefined, entity: undefined, permission: "" };
 }
 
 export const PermissionExpandRequest = {
   encode(message: PermissionExpandRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
     if (message.metadata !== undefined) {
-      PermissionExpandRequestMetadata.encode(message.metadata, writer.uint32(10).fork()).ldelim();
+      PermissionExpandRequestMetadata.encode(message.metadata, writer.uint32(18).fork()).ldelim();
     }
     if (message.entity !== undefined) {
-      Entity.encode(message.entity, writer.uint32(18).fork()).ldelim();
+      Entity.encode(message.entity, writer.uint32(26).fork()).ldelim();
     }
     if (message.permission !== "") {
-      writer.uint32(26).string(message.permission);
+      writer.uint32(34).string(message.permission);
     }
     return writer;
   },
@@ -517,12 +574,15 @@ export const PermissionExpandRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.metadata = PermissionExpandRequestMetadata.decode(reader, reader.uint32());
+          message.tenantId = reader.string();
           break;
         case 2:
-          message.entity = Entity.decode(reader, reader.uint32());
+          message.metadata = PermissionExpandRequestMetadata.decode(reader, reader.uint32());
           break;
         case 3:
+          message.entity = Entity.decode(reader, reader.uint32());
+          break;
+        case 4:
           message.permission = reader.string();
           break;
         default:
@@ -535,6 +595,7 @@ export const PermissionExpandRequest = {
 
   fromJSON(object: any): PermissionExpandRequest {
     return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
       metadata: isSet(object.metadata) ? PermissionExpandRequestMetadata.fromJSON(object.metadata) : undefined,
       entity: isSet(object.entity) ? Entity.fromJSON(object.entity) : undefined,
       permission: isSet(object.permission) ? String(object.permission) : "",
@@ -543,6 +604,7 @@ export const PermissionExpandRequest = {
 
   toJSON(message: PermissionExpandRequest): unknown {
     const obj: any = {};
+    message.tenantId !== undefined && (obj.tenant_id = message.tenantId);
     message.metadata !== undefined &&
       (obj.metadata = message.metadata ? PermissionExpandRequestMetadata.toJSON(message.metadata) : undefined);
     message.entity !== undefined && (obj.entity = message.entity ? Entity.toJSON(message.entity) : undefined);
@@ -552,6 +614,7 @@ export const PermissionExpandRequest = {
 
   fromPartial(object: DeepPartial<PermissionExpandRequest>): PermissionExpandRequest {
     const message = createBasePermissionExpandRequest();
+    message.tenantId = object.tenantId ?? "";
     message.metadata = (object.metadata !== undefined && object.metadata !== null)
       ? PermissionExpandRequestMetadata.fromPartial(object.metadata)
       : undefined;
@@ -669,19 +732,22 @@ export const PermissionExpandResponse = {
 };
 
 function createBasePermissionLookupSchemaRequest(): PermissionLookupSchemaRequest {
-  return { metadata: undefined, entityType: "", relationNames: [] };
+  return { tenantId: "", metadata: undefined, entityType: "", relationNames: [] };
 }
 
 export const PermissionLookupSchemaRequest = {
   encode(message: PermissionLookupSchemaRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
     if (message.metadata !== undefined) {
-      PermissionLookupSchemaRequestMetadata.encode(message.metadata, writer.uint32(10).fork()).ldelim();
+      PermissionLookupSchemaRequestMetadata.encode(message.metadata, writer.uint32(18).fork()).ldelim();
     }
     if (message.entityType !== "") {
-      writer.uint32(18).string(message.entityType);
+      writer.uint32(26).string(message.entityType);
     }
     for (const v of message.relationNames) {
-      writer.uint32(26).string(v!);
+      writer.uint32(34).string(v!);
     }
     return writer;
   },
@@ -694,12 +760,15 @@ export const PermissionLookupSchemaRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.metadata = PermissionLookupSchemaRequestMetadata.decode(reader, reader.uint32());
+          message.tenantId = reader.string();
           break;
         case 2:
-          message.entityType = reader.string();
+          message.metadata = PermissionLookupSchemaRequestMetadata.decode(reader, reader.uint32());
           break;
         case 3:
+          message.entityType = reader.string();
+          break;
+        case 4:
           message.relationNames.push(reader.string());
           break;
         default:
@@ -712,6 +781,7 @@ export const PermissionLookupSchemaRequest = {
 
   fromJSON(object: any): PermissionLookupSchemaRequest {
     return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
       metadata: isSet(object.metadata) ? PermissionLookupSchemaRequestMetadata.fromJSON(object.metadata) : undefined,
       entityType: isSet(object.entity_type) ? String(object.entity_type) : "",
       relationNames: Array.isArray(object?.relation_names) ? object.relation_names.map((e: any) => String(e)) : [],
@@ -720,6 +790,7 @@ export const PermissionLookupSchemaRequest = {
 
   toJSON(message: PermissionLookupSchemaRequest): unknown {
     const obj: any = {};
+    message.tenantId !== undefined && (obj.tenant_id = message.tenantId);
     message.metadata !== undefined &&
       (obj.metadata = message.metadata ? PermissionLookupSchemaRequestMetadata.toJSON(message.metadata) : undefined);
     message.entityType !== undefined && (obj.entity_type = message.entityType);
@@ -733,6 +804,7 @@ export const PermissionLookupSchemaRequest = {
 
   fromPartial(object: DeepPartial<PermissionLookupSchemaRequest>): PermissionLookupSchemaRequest {
     const message = createBasePermissionLookupSchemaRequest();
+    message.tenantId = object.tenantId ?? "";
     message.metadata = (object.metadata !== undefined && object.metadata !== null)
       ? PermissionLookupSchemaRequestMetadata.fromPartial(object.metadata)
       : undefined;
@@ -841,22 +913,25 @@ export const PermissionLookupSchemaResponse = {
 };
 
 function createBasePermissionLookupEntityRequest(): PermissionLookupEntityRequest {
-  return { metadata: undefined, entityType: "", permission: "", subject: undefined };
+  return { tenantId: "", metadata: undefined, entityType: "", permission: "", subject: undefined };
 }
 
 export const PermissionLookupEntityRequest = {
   encode(message: PermissionLookupEntityRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
     if (message.metadata !== undefined) {
-      PermissionLookupEntityRequestMetadata.encode(message.metadata, writer.uint32(10).fork()).ldelim();
+      PermissionLookupEntityRequestMetadata.encode(message.metadata, writer.uint32(18).fork()).ldelim();
     }
     if (message.entityType !== "") {
-      writer.uint32(18).string(message.entityType);
+      writer.uint32(26).string(message.entityType);
     }
     if (message.permission !== "") {
-      writer.uint32(26).string(message.permission);
+      writer.uint32(34).string(message.permission);
     }
     if (message.subject !== undefined) {
-      Subject.encode(message.subject, writer.uint32(34).fork()).ldelim();
+      Subject.encode(message.subject, writer.uint32(42).fork()).ldelim();
     }
     return writer;
   },
@@ -869,15 +944,18 @@ export const PermissionLookupEntityRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.metadata = PermissionLookupEntityRequestMetadata.decode(reader, reader.uint32());
+          message.tenantId = reader.string();
           break;
         case 2:
-          message.entityType = reader.string();
+          message.metadata = PermissionLookupEntityRequestMetadata.decode(reader, reader.uint32());
           break;
         case 3:
-          message.permission = reader.string();
+          message.entityType = reader.string();
           break;
         case 4:
+          message.permission = reader.string();
+          break;
+        case 5:
           message.subject = Subject.decode(reader, reader.uint32());
           break;
         default:
@@ -890,6 +968,7 @@ export const PermissionLookupEntityRequest = {
 
   fromJSON(object: any): PermissionLookupEntityRequest {
     return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
       metadata: isSet(object.metadata) ? PermissionLookupEntityRequestMetadata.fromJSON(object.metadata) : undefined,
       entityType: isSet(object.entity_type) ? String(object.entity_type) : "",
       permission: isSet(object.permission) ? String(object.permission) : "",
@@ -899,6 +978,7 @@ export const PermissionLookupEntityRequest = {
 
   toJSON(message: PermissionLookupEntityRequest): unknown {
     const obj: any = {};
+    message.tenantId !== undefined && (obj.tenant_id = message.tenantId);
     message.metadata !== undefined &&
       (obj.metadata = message.metadata ? PermissionLookupEntityRequestMetadata.toJSON(message.metadata) : undefined);
     message.entityType !== undefined && (obj.entity_type = message.entityType);
@@ -909,6 +989,7 @@ export const PermissionLookupEntityRequest = {
 
   fromPartial(object: DeepPartial<PermissionLookupEntityRequest>): PermissionLookupEntityRequest {
     const message = createBasePermissionLookupEntityRequest();
+    message.tenantId = object.tenantId ?? "";
     message.metadata = (object.metadata !== undefined && object.metadata !== null)
       ? PermissionLookupEntityRequestMetadata.fromPartial(object.metadata)
       : undefined;
@@ -1087,13 +1168,16 @@ export const PermissionLookupEntityStreamResponse = {
 };
 
 function createBaseSchemaWriteRequest(): SchemaWriteRequest {
-  return { schema: "" };
+  return { tenantId: "", schema: "" };
 }
 
 export const SchemaWriteRequest = {
   encode(message: SchemaWriteRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
     if (message.schema !== "") {
-      writer.uint32(10).string(message.schema);
+      writer.uint32(18).string(message.schema);
     }
     return writer;
   },
@@ -1106,6 +1190,9 @@ export const SchemaWriteRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          message.tenantId = reader.string();
+          break;
+        case 2:
           message.schema = reader.string();
           break;
         default:
@@ -1117,17 +1204,22 @@ export const SchemaWriteRequest = {
   },
 
   fromJSON(object: any): SchemaWriteRequest {
-    return { schema: isSet(object.schema) ? String(object.schema) : "" };
+    return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
+      schema: isSet(object.schema) ? String(object.schema) : "",
+    };
   },
 
   toJSON(message: SchemaWriteRequest): unknown {
     const obj: any = {};
+    message.tenantId !== undefined && (obj.tenant_id = message.tenantId);
     message.schema !== undefined && (obj.schema = message.schema);
     return obj;
   },
 
   fromPartial(object: DeepPartial<SchemaWriteRequest>): SchemaWriteRequest {
     const message = createBaseSchemaWriteRequest();
+    message.tenantId = object.tenantId ?? "";
     message.schema = object.schema ?? "";
     return message;
   },
@@ -1181,13 +1273,16 @@ export const SchemaWriteResponse = {
 };
 
 function createBaseSchemaReadRequest(): SchemaReadRequest {
-  return { metadata: undefined };
+  return { tenantId: "", metadata: undefined };
 }
 
 export const SchemaReadRequest = {
   encode(message: SchemaReadRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
     if (message.metadata !== undefined) {
-      SchemaReadRequestMetadata.encode(message.metadata, writer.uint32(10).fork()).ldelim();
+      SchemaReadRequestMetadata.encode(message.metadata, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
@@ -1200,6 +1295,9 @@ export const SchemaReadRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          message.tenantId = reader.string();
+          break;
+        case 2:
           message.metadata = SchemaReadRequestMetadata.decode(reader, reader.uint32());
           break;
         default:
@@ -1211,11 +1309,15 @@ export const SchemaReadRequest = {
   },
 
   fromJSON(object: any): SchemaReadRequest {
-    return { metadata: isSet(object.metadata) ? SchemaReadRequestMetadata.fromJSON(object.metadata) : undefined };
+    return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
+      metadata: isSet(object.metadata) ? SchemaReadRequestMetadata.fromJSON(object.metadata) : undefined,
+    };
   },
 
   toJSON(message: SchemaReadRequest): unknown {
     const obj: any = {};
+    message.tenantId !== undefined && (obj.tenant_id = message.tenantId);
     message.metadata !== undefined &&
       (obj.metadata = message.metadata ? SchemaReadRequestMetadata.toJSON(message.metadata) : undefined);
     return obj;
@@ -1223,6 +1325,7 @@ export const SchemaReadRequest = {
 
   fromPartial(object: DeepPartial<SchemaReadRequest>): SchemaReadRequest {
     const message = createBaseSchemaReadRequest();
+    message.tenantId = object.tenantId ?? "";
     message.metadata = (object.metadata !== undefined && object.metadata !== null)
       ? SchemaReadRequestMetadata.fromPartial(object.metadata)
       : undefined;
@@ -1327,16 +1430,19 @@ export const SchemaReadResponse = {
 };
 
 function createBaseRelationshipWriteRequest(): RelationshipWriteRequest {
-  return { metadata: undefined, tuples: [] };
+  return { tenantId: "", metadata: undefined, tuples: [] };
 }
 
 export const RelationshipWriteRequest = {
   encode(message: RelationshipWriteRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
     if (message.metadata !== undefined) {
-      RelationshipWriteRequestMetadata.encode(message.metadata, writer.uint32(10).fork()).ldelim();
+      RelationshipWriteRequestMetadata.encode(message.metadata, writer.uint32(18).fork()).ldelim();
     }
     for (const v of message.tuples) {
-      Tuple.encode(v!, writer.uint32(18).fork()).ldelim();
+      Tuple.encode(v!, writer.uint32(26).fork()).ldelim();
     }
     return writer;
   },
@@ -1349,9 +1455,12 @@ export const RelationshipWriteRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.metadata = RelationshipWriteRequestMetadata.decode(reader, reader.uint32());
+          message.tenantId = reader.string();
           break;
         case 2:
+          message.metadata = RelationshipWriteRequestMetadata.decode(reader, reader.uint32());
+          break;
+        case 3:
           message.tuples.push(Tuple.decode(reader, reader.uint32()));
           break;
         default:
@@ -1364,6 +1473,7 @@ export const RelationshipWriteRequest = {
 
   fromJSON(object: any): RelationshipWriteRequest {
     return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
       metadata: isSet(object.metadata) ? RelationshipWriteRequestMetadata.fromJSON(object.metadata) : undefined,
       tuples: Array.isArray(object?.tuples) ? object.tuples.map((e: any) => Tuple.fromJSON(e)) : [],
     };
@@ -1371,6 +1481,7 @@ export const RelationshipWriteRequest = {
 
   toJSON(message: RelationshipWriteRequest): unknown {
     const obj: any = {};
+    message.tenantId !== undefined && (obj.tenant_id = message.tenantId);
     message.metadata !== undefined &&
       (obj.metadata = message.metadata ? RelationshipWriteRequestMetadata.toJSON(message.metadata) : undefined);
     if (message.tuples) {
@@ -1383,6 +1494,7 @@ export const RelationshipWriteRequest = {
 
   fromPartial(object: DeepPartial<RelationshipWriteRequest>): RelationshipWriteRequest {
     const message = createBaseRelationshipWriteRequest();
+    message.tenantId = object.tenantId ?? "";
     message.metadata = (object.metadata !== undefined && object.metadata !== null)
       ? RelationshipWriteRequestMetadata.fromPartial(object.metadata)
       : undefined;
@@ -1486,16 +1598,25 @@ export const RelationshipWriteResponse = {
 };
 
 function createBaseRelationshipReadRequest(): RelationshipReadRequest {
-  return { metadata: undefined, filter: undefined };
+  return { tenantId: "", metadata: undefined, filter: undefined, pageSize: 0, continuousToken: "" };
 }
 
 export const RelationshipReadRequest = {
   encode(message: RelationshipReadRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
     if (message.metadata !== undefined) {
-      RelationshipReadRequestMetadata.encode(message.metadata, writer.uint32(10).fork()).ldelim();
+      RelationshipReadRequestMetadata.encode(message.metadata, writer.uint32(18).fork()).ldelim();
     }
     if (message.filter !== undefined) {
-      TupleFilter.encode(message.filter, writer.uint32(18).fork()).ldelim();
+      TupleFilter.encode(message.filter, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.pageSize !== 0) {
+      writer.uint32(32).uint32(message.pageSize);
+    }
+    if (message.continuousToken !== "") {
+      writer.uint32(42).string(message.continuousToken);
     }
     return writer;
   },
@@ -1508,10 +1629,19 @@ export const RelationshipReadRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.metadata = RelationshipReadRequestMetadata.decode(reader, reader.uint32());
+          message.tenantId = reader.string();
           break;
         case 2:
+          message.metadata = RelationshipReadRequestMetadata.decode(reader, reader.uint32());
+          break;
+        case 3:
           message.filter = TupleFilter.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.pageSize = reader.uint32();
+          break;
+        case 5:
+          message.continuousToken = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -1523,27 +1653,36 @@ export const RelationshipReadRequest = {
 
   fromJSON(object: any): RelationshipReadRequest {
     return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
       metadata: isSet(object.metadata) ? RelationshipReadRequestMetadata.fromJSON(object.metadata) : undefined,
       filter: isSet(object.filter) ? TupleFilter.fromJSON(object.filter) : undefined,
+      pageSize: isSet(object.page_size) ? Number(object.page_size) : 0,
+      continuousToken: isSet(object.continuous_token) ? String(object.continuous_token) : "",
     };
   },
 
   toJSON(message: RelationshipReadRequest): unknown {
     const obj: any = {};
+    message.tenantId !== undefined && (obj.tenant_id = message.tenantId);
     message.metadata !== undefined &&
       (obj.metadata = message.metadata ? RelationshipReadRequestMetadata.toJSON(message.metadata) : undefined);
     message.filter !== undefined && (obj.filter = message.filter ? TupleFilter.toJSON(message.filter) : undefined);
+    message.pageSize !== undefined && (obj.page_size = Math.round(message.pageSize));
+    message.continuousToken !== undefined && (obj.continuous_token = message.continuousToken);
     return obj;
   },
 
   fromPartial(object: DeepPartial<RelationshipReadRequest>): RelationshipReadRequest {
     const message = createBaseRelationshipReadRequest();
+    message.tenantId = object.tenantId ?? "";
     message.metadata = (object.metadata !== undefined && object.metadata !== null)
       ? RelationshipReadRequestMetadata.fromPartial(object.metadata)
       : undefined;
     message.filter = (object.filter !== undefined && object.filter !== null)
       ? TupleFilter.fromPartial(object.filter)
       : undefined;
+    message.pageSize = object.pageSize ?? 0;
+    message.continuousToken = object.continuousToken ?? "";
     return message;
   },
 };
@@ -1596,13 +1735,16 @@ export const RelationshipReadRequestMetadata = {
 };
 
 function createBaseRelationshipReadResponse(): RelationshipReadResponse {
-  return { tuples: [] };
+  return { tuples: [], continuousToken: "" };
 }
 
 export const RelationshipReadResponse = {
   encode(message: RelationshipReadResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.tuples) {
       Tuple.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.continuousToken !== "") {
+      writer.uint32(18).string(message.continuousToken);
     }
     return writer;
   },
@@ -1617,6 +1759,9 @@ export const RelationshipReadResponse = {
         case 1:
           message.tuples.push(Tuple.decode(reader, reader.uint32()));
           break;
+        case 2:
+          message.continuousToken = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1626,7 +1771,10 @@ export const RelationshipReadResponse = {
   },
 
   fromJSON(object: any): RelationshipReadResponse {
-    return { tuples: Array.isArray(object?.tuples) ? object.tuples.map((e: any) => Tuple.fromJSON(e)) : [] };
+    return {
+      tuples: Array.isArray(object?.tuples) ? object.tuples.map((e: any) => Tuple.fromJSON(e)) : [],
+      continuousToken: isSet(object.continuous_token) ? String(object.continuous_token) : "",
+    };
   },
 
   toJSON(message: RelationshipReadResponse): unknown {
@@ -1636,24 +1784,29 @@ export const RelationshipReadResponse = {
     } else {
       obj.tuples = [];
     }
+    message.continuousToken !== undefined && (obj.continuous_token = message.continuousToken);
     return obj;
   },
 
   fromPartial(object: DeepPartial<RelationshipReadResponse>): RelationshipReadResponse {
     const message = createBaseRelationshipReadResponse();
     message.tuples = object.tuples?.map((e) => Tuple.fromPartial(e)) || [];
+    message.continuousToken = object.continuousToken ?? "";
     return message;
   },
 };
 
 function createBaseRelationshipDeleteRequest(): RelationshipDeleteRequest {
-  return { filter: undefined };
+  return { tenantId: "", filter: undefined };
 }
 
 export const RelationshipDeleteRequest = {
   encode(message: RelationshipDeleteRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
     if (message.filter !== undefined) {
-      TupleFilter.encode(message.filter, writer.uint32(10).fork()).ldelim();
+      TupleFilter.encode(message.filter, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
@@ -1666,6 +1819,9 @@ export const RelationshipDeleteRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          message.tenantId = reader.string();
+          break;
+        case 2:
           message.filter = TupleFilter.decode(reader, reader.uint32());
           break;
         default:
@@ -1677,17 +1833,22 @@ export const RelationshipDeleteRequest = {
   },
 
   fromJSON(object: any): RelationshipDeleteRequest {
-    return { filter: isSet(object.filter) ? TupleFilter.fromJSON(object.filter) : undefined };
+    return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
+      filter: isSet(object.filter) ? TupleFilter.fromJSON(object.filter) : undefined,
+    };
   },
 
   toJSON(message: RelationshipDeleteRequest): unknown {
     const obj: any = {};
+    message.tenantId !== undefined && (obj.tenant_id = message.tenantId);
     message.filter !== undefined && (obj.filter = message.filter ? TupleFilter.toJSON(message.filter) : undefined);
     return obj;
   },
 
   fromPartial(object: DeepPartial<RelationshipDeleteRequest>): RelationshipDeleteRequest {
     const message = createBaseRelationshipDeleteRequest();
+    message.tenantId = object.tenantId ?? "";
     message.filter = (object.filter !== undefined && object.filter !== null)
       ? TupleFilter.fromPartial(object.filter)
       : undefined;
@@ -1738,6 +1899,326 @@ export const RelationshipDeleteResponse = {
   fromPartial(object: DeepPartial<RelationshipDeleteResponse>): RelationshipDeleteResponse {
     const message = createBaseRelationshipDeleteResponse();
     message.snapToken = object.snapToken ?? "";
+    return message;
+  },
+};
+
+function createBaseTenantCreateRequest(): TenantCreateRequest {
+  return { id: "", name: "" };
+}
+
+export const TenantCreateRequest = {
+  encode(message: TenantCreateRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TenantCreateRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTenantCreateRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.id = reader.string();
+          break;
+        case 2:
+          message.name = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TenantCreateRequest {
+    return { id: isSet(object.id) ? String(object.id) : "", name: isSet(object.name) ? String(object.name) : "" };
+  },
+
+  toJSON(message: TenantCreateRequest): unknown {
+    const obj: any = {};
+    message.id !== undefined && (obj.id = message.id);
+    message.name !== undefined && (obj.name = message.name);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<TenantCreateRequest>): TenantCreateRequest {
+    const message = createBaseTenantCreateRequest();
+    message.id = object.id ?? "";
+    message.name = object.name ?? "";
+    return message;
+  },
+};
+
+function createBaseTenantCreateResponse(): TenantCreateResponse {
+  return { tenant: undefined };
+}
+
+export const TenantCreateResponse = {
+  encode(message: TenantCreateResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenant !== undefined) {
+      Tenant.encode(message.tenant, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TenantCreateResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTenantCreateResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.tenant = Tenant.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TenantCreateResponse {
+    return { tenant: isSet(object.tenant) ? Tenant.fromJSON(object.tenant) : undefined };
+  },
+
+  toJSON(message: TenantCreateResponse): unknown {
+    const obj: any = {};
+    message.tenant !== undefined && (obj.tenant = message.tenant ? Tenant.toJSON(message.tenant) : undefined);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<TenantCreateResponse>): TenantCreateResponse {
+    const message = createBaseTenantCreateResponse();
+    message.tenant = (object.tenant !== undefined && object.tenant !== null)
+      ? Tenant.fromPartial(object.tenant)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseTenantDeleteRequest(): TenantDeleteRequest {
+  return { id: "" };
+}
+
+export const TenantDeleteRequest = {
+  encode(message: TenantDeleteRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TenantDeleteRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTenantDeleteRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.id = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TenantDeleteRequest {
+    return { id: isSet(object.id) ? String(object.id) : "" };
+  },
+
+  toJSON(message: TenantDeleteRequest): unknown {
+    const obj: any = {};
+    message.id !== undefined && (obj.id = message.id);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<TenantDeleteRequest>): TenantDeleteRequest {
+    const message = createBaseTenantDeleteRequest();
+    message.id = object.id ?? "";
+    return message;
+  },
+};
+
+function createBaseTenantDeleteResponse(): TenantDeleteResponse {
+  return { tenant: undefined };
+}
+
+export const TenantDeleteResponse = {
+  encode(message: TenantDeleteResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenant !== undefined) {
+      Tenant.encode(message.tenant, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TenantDeleteResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTenantDeleteResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.tenant = Tenant.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TenantDeleteResponse {
+    return { tenant: isSet(object.tenant) ? Tenant.fromJSON(object.tenant) : undefined };
+  },
+
+  toJSON(message: TenantDeleteResponse): unknown {
+    const obj: any = {};
+    message.tenant !== undefined && (obj.tenant = message.tenant ? Tenant.toJSON(message.tenant) : undefined);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<TenantDeleteResponse>): TenantDeleteResponse {
+    const message = createBaseTenantDeleteResponse();
+    message.tenant = (object.tenant !== undefined && object.tenant !== null)
+      ? Tenant.fromPartial(object.tenant)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseTenantListRequest(): TenantListRequest {
+  return { pageSize: 0, continuousToken: "" };
+}
+
+export const TenantListRequest = {
+  encode(message: TenantListRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.pageSize !== 0) {
+      writer.uint32(32).uint32(message.pageSize);
+    }
+    if (message.continuousToken !== "") {
+      writer.uint32(42).string(message.continuousToken);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TenantListRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTenantListRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 4:
+          message.pageSize = reader.uint32();
+          break;
+        case 5:
+          message.continuousToken = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TenantListRequest {
+    return {
+      pageSize: isSet(object.page_size) ? Number(object.page_size) : 0,
+      continuousToken: isSet(object.continuous_token) ? String(object.continuous_token) : "",
+    };
+  },
+
+  toJSON(message: TenantListRequest): unknown {
+    const obj: any = {};
+    message.pageSize !== undefined && (obj.page_size = Math.round(message.pageSize));
+    message.continuousToken !== undefined && (obj.continuous_token = message.continuousToken);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<TenantListRequest>): TenantListRequest {
+    const message = createBaseTenantListRequest();
+    message.pageSize = object.pageSize ?? 0;
+    message.continuousToken = object.continuousToken ?? "";
+    return message;
+  },
+};
+
+function createBaseTenantListResponse(): TenantListResponse {
+  return { tenants: [], continuousToken: "" };
+}
+
+export const TenantListResponse = {
+  encode(message: TenantListResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.tenants) {
+      Tenant.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.continuousToken !== "") {
+      writer.uint32(18).string(message.continuousToken);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): TenantListResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTenantListResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.tenants.push(Tenant.decode(reader, reader.uint32()));
+          break;
+        case 2:
+          message.continuousToken = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TenantListResponse {
+    return {
+      tenants: Array.isArray(object?.tenants) ? object.tenants.map((e: any) => Tenant.fromJSON(e)) : [],
+      continuousToken: isSet(object.continuous_token) ? String(object.continuous_token) : "",
+    };
+  },
+
+  toJSON(message: TenantListResponse): unknown {
+    const obj: any = {};
+    if (message.tenants) {
+      obj.tenants = message.tenants.map((e) => e ? Tenant.toJSON(e) : undefined);
+    } else {
+      obj.tenants = [];
+    }
+    message.continuousToken !== undefined && (obj.continuous_token = message.continuousToken);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<TenantListResponse>): TenantListResponse {
+    const message = createBaseTenantListResponse();
+    message.tenants = object.tenants?.map((e) => Tenant.fromPartial(e)) || [];
+    message.continuousToken = object.continuousToken ?? "";
     return message;
   },
 };
@@ -2140,6 +2621,62 @@ export interface RelationshipClient<CallOptionsExt = {}> {
     request: DeepPartial<RelationshipDeleteRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<RelationshipDeleteResponse>;
+}
+
+export type TenancyDefinition = typeof TenancyDefinition;
+export const TenancyDefinition = {
+  name: "Tenancy",
+  fullName: "base.v1.Tenancy",
+  methods: {
+    create: {
+      name: "Create",
+      requestType: TenantCreateRequest,
+      requestStream: false,
+      responseType: TenantCreateResponse,
+      responseStream: false,
+      options: {},
+    },
+    delete: {
+      name: "Delete",
+      requestType: TenantDeleteRequest,
+      requestStream: false,
+      responseType: TenantDeleteResponse,
+      responseStream: false,
+      options: {},
+    },
+    list: {
+      name: "List",
+      requestType: TenantListRequest,
+      requestStream: false,
+      responseType: TenantListResponse,
+      responseStream: false,
+      options: {},
+    },
+  },
+} as const;
+
+export interface TenancyServiceImplementation<CallContextExt = {}> {
+  create(
+    request: TenantCreateRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<TenantCreateResponse>>;
+  delete(
+    request: TenantDeleteRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<TenantDeleteResponse>>;
+  list(request: TenantListRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TenantListResponse>>;
+}
+
+export interface TenancyClient<CallOptionsExt = {}> {
+  create(
+    request: DeepPartial<TenantCreateRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<TenantCreateResponse>;
+  delete(
+    request: DeepPartial<TenantDeleteRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<TenantDeleteResponse>;
+  list(request: DeepPartial<TenantListRequest>, options?: CallOptions & CallOptionsExt): Promise<TenantListResponse>;
 }
 
 /** * WELCOME SERVICE ** */

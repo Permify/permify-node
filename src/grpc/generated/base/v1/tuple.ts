@@ -1,6 +1,7 @@
 /* eslint-disable */
 import Long from "long";
 import _m0 from "protobufjs/minimal";
+import { Timestamp } from "../../google/protobuf/timestamp";
 
 export const protobufPackage = "base.v1";
 
@@ -116,6 +117,13 @@ export interface Result {
   target: EntityAndRelation | undefined;
   exclusion: boolean;
   subjects: Subject[];
+}
+
+/** Tenant */
+export interface Tenant {
+  id: string;
+  name: string;
+  createdAt: Date | undefined;
 }
 
 function createBaseTuple(): Tuple {
@@ -889,6 +897,73 @@ export const Result = {
   },
 };
 
+function createBaseTenant(): Tenant {
+  return { id: "", name: "", createdAt: undefined };
+}
+
+export const Tenant = {
+  encode(message: Tenant, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    if (message.createdAt !== undefined) {
+      Timestamp.encode(toTimestamp(message.createdAt), writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Tenant {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTenant();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.id = reader.string();
+          break;
+        case 2:
+          message.name = reader.string();
+          break;
+        case 3:
+          message.createdAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Tenant {
+    return {
+      id: isSet(object.id) ? String(object.id) : "",
+      name: isSet(object.name) ? String(object.name) : "",
+      createdAt: isSet(object.created_at) ? fromJsonTimestamp(object.created_at) : undefined,
+    };
+  },
+
+  toJSON(message: Tenant): unknown {
+    const obj: any = {};
+    message.id !== undefined && (obj.id = message.id);
+    message.name !== undefined && (obj.name = message.name);
+    message.createdAt !== undefined && (obj.created_at = message.createdAt.toISOString());
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<Tenant>): Tenant {
+    const message = createBaseTenant();
+    message.id = object.id ?? "";
+    message.name = object.name ?? "";
+    message.createdAt = object.createdAt ?? undefined;
+    return message;
+  },
+};
+
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
@@ -897,6 +972,32 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends { $case: string } ? { [K in keyof Omit<T, "$case">]?: DeepPartial<T[K]> } & { $case: T["$case"] }
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+function toTimestamp(date: Date): Timestamp {
+  const seconds = numberToLong(date.getTime() / 1_000);
+  const nanos = (date.getTime() % 1_000) * 1_000_000;
+  return { seconds, nanos };
+}
+
+function fromTimestamp(t: Timestamp): Date {
+  let millis = t.seconds.toNumber() * 1_000;
+  millis += t.nanos / 1_000_000;
+  return new Date(millis);
+}
+
+function fromJsonTimestamp(o: any): Date {
+  if (o instanceof Date) {
+    return o;
+  } else if (typeof o === "string") {
+    return new Date(o);
+  } else {
+    return fromTimestamp(Timestamp.fromJSON(o));
+  }
+}
+
+function numberToLong(number: number) {
+  return Long.fromNumber(number);
+}
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;
