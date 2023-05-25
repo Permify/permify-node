@@ -117,6 +117,7 @@ message ExpandTreeNode {
     OPERATION_UNSPECIFIED = 0;
     OPERATION_UNION = 1;
     OPERATION_INTERSECTION = 2;
+    OPERATION_EXCLUSION = 3;
   }
 
   Operation operation = 1;
@@ -126,17 +127,16 @@ message ExpandTreeNode {
 
 // Expand
 message Expand {
+  EntityAndRelation target = 1;
   oneof node {
-    ExpandTreeNode expand = 1;
-    Result leaf = 2;
+    ExpandTreeNode expand = 2;
+    Subjects leaf = 3;
   }
 }
 
 // Result
-message Result {
-  EntityAndRelation target = 1;
-  bool exclusion = 2;
-  repeated Subject subjects = 3;
+message Subjects {
+  repeated Subject subjects = 1;
 }
 
 // Tenant

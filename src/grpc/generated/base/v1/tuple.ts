@@ -72,6 +72,7 @@ export enum ExpandTreeNode_Operation {
   OPERATION_UNSPECIFIED = 0,
   OPERATION_UNION = 1,
   OPERATION_INTERSECTION = 2,
+  OPERATION_EXCLUSION = 3,
   UNRECOGNIZED = -1,
 }
 
@@ -86,6 +87,9 @@ export function expandTreeNode_OperationFromJSON(object: any): ExpandTreeNode_Op
     case 2:
     case "OPERATION_INTERSECTION":
       return ExpandTreeNode_Operation.OPERATION_INTERSECTION;
+    case 3:
+    case "OPERATION_EXCLUSION":
+      return ExpandTreeNode_Operation.OPERATION_EXCLUSION;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -101,6 +105,8 @@ export function expandTreeNode_OperationToJSON(object: ExpandTreeNode_Operation)
       return "OPERATION_UNION";
     case ExpandTreeNode_Operation.OPERATION_INTERSECTION:
       return "OPERATION_INTERSECTION";
+    case ExpandTreeNode_Operation.OPERATION_EXCLUSION:
+      return "OPERATION_EXCLUSION";
     case ExpandTreeNode_Operation.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
@@ -109,13 +115,12 @@ export function expandTreeNode_OperationToJSON(object: ExpandTreeNode_Operation)
 
 /** Expand */
 export interface Expand {
-  node?: { $case: "expand"; expand: ExpandTreeNode } | { $case: "leaf"; leaf: Result };
+  target: EntityAndRelation | undefined;
+  node?: { $case: "expand"; expand: ExpandTreeNode } | { $case: "leaf"; leaf: Subjects };
 }
 
 /** Result */
-export interface Result {
-  target: EntityAndRelation | undefined;
-  exclusion: boolean;
+export interface Subjects {
   subjects: Subject[];
 }
 
@@ -758,16 +763,19 @@ export const ExpandTreeNode = {
 };
 
 function createBaseExpand(): Expand {
-  return { node: undefined };
+  return { target: undefined, node: undefined };
 }
 
 export const Expand = {
   encode(message: Expand, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.target !== undefined) {
+      EntityAndRelation.encode(message.target, writer.uint32(10).fork()).ldelim();
+    }
     if (message.node?.$case === "expand") {
-      ExpandTreeNode.encode(message.node.expand, writer.uint32(10).fork()).ldelim();
+      ExpandTreeNode.encode(message.node.expand, writer.uint32(18).fork()).ldelim();
     }
     if (message.node?.$case === "leaf") {
-      Result.encode(message.node.leaf, writer.uint32(18).fork()).ldelim();
+      Subjects.encode(message.node.leaf, writer.uint32(26).fork()).ldelim();
     }
     return writer;
   },
@@ -780,10 +788,13 @@ export const Expand = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.node = { $case: "expand", expand: ExpandTreeNode.decode(reader, reader.uint32()) };
+          message.target = EntityAndRelation.decode(reader, reader.uint32());
           break;
         case 2:
-          message.node = { $case: "leaf", leaf: Result.decode(reader, reader.uint32()) };
+          message.node = { $case: "expand", expand: ExpandTreeNode.decode(reader, reader.uint32()) };
+          break;
+        case 3:
+          message.node = { $case: "leaf", leaf: Subjects.decode(reader, reader.uint32()) };
           break;
         default:
           reader.skipType(tag & 7);
@@ -795,66 +806,60 @@ export const Expand = {
 
   fromJSON(object: any): Expand {
     return {
+      target: isSet(object.target) ? EntityAndRelation.fromJSON(object.target) : undefined,
       node: isSet(object.expand)
         ? { $case: "expand", expand: ExpandTreeNode.fromJSON(object.expand) }
         : isSet(object.leaf)
-        ? { $case: "leaf", leaf: Result.fromJSON(object.leaf) }
+        ? { $case: "leaf", leaf: Subjects.fromJSON(object.leaf) }
         : undefined,
     };
   },
 
   toJSON(message: Expand): unknown {
     const obj: any = {};
+    message.target !== undefined &&
+      (obj.target = message.target ? EntityAndRelation.toJSON(message.target) : undefined);
     message.node?.$case === "expand" &&
       (obj.expand = message.node?.expand ? ExpandTreeNode.toJSON(message.node?.expand) : undefined);
-    message.node?.$case === "leaf" && (obj.leaf = message.node?.leaf ? Result.toJSON(message.node?.leaf) : undefined);
+    message.node?.$case === "leaf" && (obj.leaf = message.node?.leaf ? Subjects.toJSON(message.node?.leaf) : undefined);
     return obj;
   },
 
   fromPartial(object: DeepPartial<Expand>): Expand {
     const message = createBaseExpand();
+    message.target = (object.target !== undefined && object.target !== null)
+      ? EntityAndRelation.fromPartial(object.target)
+      : undefined;
     if (object.node?.$case === "expand" && object.node?.expand !== undefined && object.node?.expand !== null) {
       message.node = { $case: "expand", expand: ExpandTreeNode.fromPartial(object.node.expand) };
     }
     if (object.node?.$case === "leaf" && object.node?.leaf !== undefined && object.node?.leaf !== null) {
-      message.node = { $case: "leaf", leaf: Result.fromPartial(object.node.leaf) };
+      message.node = { $case: "leaf", leaf: Subjects.fromPartial(object.node.leaf) };
     }
     return message;
   },
 };
 
-function createBaseResult(): Result {
-  return { target: undefined, exclusion: false, subjects: [] };
+function createBaseSubjects(): Subjects {
+  return { subjects: [] };
 }
 
-export const Result = {
-  encode(message: Result, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.target !== undefined) {
-      EntityAndRelation.encode(message.target, writer.uint32(10).fork()).ldelim();
-    }
-    if (message.exclusion === true) {
-      writer.uint32(16).bool(message.exclusion);
-    }
+export const Subjects = {
+  encode(message: Subjects, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.subjects) {
-      Subject.encode(v!, writer.uint32(26).fork()).ldelim();
+      Subject.encode(v!, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): Result {
+  decode(input: _m0.Reader | Uint8Array, length?: number): Subjects {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseResult();
+    const message = createBaseSubjects();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.target = EntityAndRelation.decode(reader, reader.uint32());
-          break;
-        case 2:
-          message.exclusion = reader.bool();
-          break;
-        case 3:
           message.subjects.push(Subject.decode(reader, reader.uint32()));
           break;
         default:
@@ -865,19 +870,12 @@ export const Result = {
     return message;
   },
 
-  fromJSON(object: any): Result {
-    return {
-      target: isSet(object.target) ? EntityAndRelation.fromJSON(object.target) : undefined,
-      exclusion: isSet(object.exclusion) ? Boolean(object.exclusion) : false,
-      subjects: Array.isArray(object?.subjects) ? object.subjects.map((e: any) => Subject.fromJSON(e)) : [],
-    };
+  fromJSON(object: any): Subjects {
+    return { subjects: Array.isArray(object?.subjects) ? object.subjects.map((e: any) => Subject.fromJSON(e)) : [] };
   },
 
-  toJSON(message: Result): unknown {
+  toJSON(message: Subjects): unknown {
     const obj: any = {};
-    message.target !== undefined &&
-      (obj.target = message.target ? EntityAndRelation.toJSON(message.target) : undefined);
-    message.exclusion !== undefined && (obj.exclusion = message.exclusion);
     if (message.subjects) {
       obj.subjects = message.subjects.map((e) => e ? Subject.toJSON(e) : undefined);
     } else {
@@ -886,12 +884,8 @@ export const Result = {
     return obj;
   },
 
-  fromPartial(object: DeepPartial<Result>): Result {
-    const message = createBaseResult();
-    message.target = (object.target !== undefined && object.target !== null)
-      ? EntityAndRelation.fromPartial(object.target)
-      : undefined;
-    message.exclusion = object.exclusion ?? false;
+  fromPartial(object: DeepPartial<Subjects>): Subjects {
+    const message = createBaseSubjects();
     message.subjects = object.subjects?.map((e) => Subject.fromPartial(e)) || [];
     return message;
   },

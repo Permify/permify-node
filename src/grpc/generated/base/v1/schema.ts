@@ -11,7 +11,6 @@ export interface Child {
 
 /** Leaf */
 export interface Leaf {
-  exclusion: boolean;
   type?: { $case: "computedUserSet"; computedUserSet: ComputedUserSet } | {
     $case: "tupleToUserSet";
     tupleToUserSet: TupleToUserSet;
@@ -29,6 +28,7 @@ export enum Rewrite_Operation {
   OPERATION_UNSPECIFIED = 0,
   OPERATION_UNION = 1,
   OPERATION_INTERSECTION = 2,
+  OPERATION_EXCLUSION = 3,
   UNRECOGNIZED = -1,
 }
 
@@ -43,6 +43,9 @@ export function rewrite_OperationFromJSON(object: any): Rewrite_Operation {
     case 2:
     case "OPERATION_INTERSECTION":
       return Rewrite_Operation.OPERATION_INTERSECTION;
+    case 3:
+    case "OPERATION_EXCLUSION":
+      return Rewrite_Operation.OPERATION_EXCLUSION;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -58,34 +61,22 @@ export function rewrite_OperationToJSON(object: Rewrite_Operation): string {
       return "OPERATION_UNION";
     case Rewrite_Operation.OPERATION_INTERSECTION:
       return "OPERATION_INTERSECTION";
+    case Rewrite_Operation.OPERATION_EXCLUSION:
+      return "OPERATION_EXCLUSION";
     case Rewrite_Operation.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
   }
 }
 
-/** IndexedSchema */
-export interface IndexedSchema {
+/** Definition */
+export interface SchemaDefinition {
   entityDefinitions: { [key: string]: EntityDefinition };
-  /** ["entity_name#relation_name"] => RelationDefinition */
-  relationDefinitions: { [key: string]: RelationDefinition };
-  /** ["entity_name#action_name"] => ActionDefinition */
-  actionDefinitions: { [key: string]: ActionDefinition };
 }
 
-export interface IndexedSchema_EntityDefinitionsEntry {
+export interface SchemaDefinition_EntityDefinitionsEntry {
   key: string;
   value: EntityDefinition | undefined;
-}
-
-export interface IndexedSchema_RelationDefinitionsEntry {
-  key: string;
-  value: RelationDefinition | undefined;
-}
-
-export interface IndexedSchema_ActionDefinitionsEntry {
-  key: string;
-  value: ActionDefinition | undefined;
 }
 
 /** EntityDefinition */
@@ -93,18 +84,17 @@ export interface EntityDefinition {
   name: string;
   /** ["relation_name"] => RelationDefinition */
   relations: { [key: string]: RelationDefinition };
-  /** ["action_name"] => ActionDefinition */
-  actions: { [key: string]: ActionDefinition };
-  /** ["relation_name or action_name"] => RelationalReference */
+  /** ["permission_name"] => PermissionDefinition */
+  permissions: { [key: string]: PermissionDefinition };
+  /** ["relation_name or permission_name"] => RelationalReference */
   references: { [key: string]: EntityDefinition_RelationalReference };
-  option: { [key: string]: string };
 }
 
 /** RelationalReference */
 export enum EntityDefinition_RelationalReference {
   RELATIONAL_REFERENCE_UNSPECIFIED = 0,
   RELATIONAL_REFERENCE_RELATION = 1,
-  RELATIONAL_REFERENCE_ACTION = 2,
+  RELATIONAL_REFERENCE_PERMISSION = 2,
   UNRECOGNIZED = -1,
 }
 
@@ -117,8 +107,8 @@ export function entityDefinition_RelationalReferenceFromJSON(object: any): Entit
     case "RELATIONAL_REFERENCE_RELATION":
       return EntityDefinition_RelationalReference.RELATIONAL_REFERENCE_RELATION;
     case 2:
-    case "RELATIONAL_REFERENCE_ACTION":
-      return EntityDefinition_RelationalReference.RELATIONAL_REFERENCE_ACTION;
+    case "RELATIONAL_REFERENCE_PERMISSION":
+      return EntityDefinition_RelationalReference.RELATIONAL_REFERENCE_PERMISSION;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -132,8 +122,8 @@ export function entityDefinition_RelationalReferenceToJSON(object: EntityDefinit
       return "RELATIONAL_REFERENCE_UNSPECIFIED";
     case EntityDefinition_RelationalReference.RELATIONAL_REFERENCE_RELATION:
       return "RELATIONAL_REFERENCE_RELATION";
-    case EntityDefinition_RelationalReference.RELATIONAL_REFERENCE_ACTION:
-      return "RELATIONAL_REFERENCE_ACTION";
+    case EntityDefinition_RelationalReference.RELATIONAL_REFERENCE_PERMISSION:
+      return "RELATIONAL_REFERENCE_PERMISSION";
     case EntityDefinition_RelationalReference.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
@@ -145,9 +135,9 @@ export interface EntityDefinition_RelationsEntry {
   value: RelationDefinition | undefined;
 }
 
-export interface EntityDefinition_ActionsEntry {
+export interface EntityDefinition_PermissionsEntry {
   key: string;
-  value: ActionDefinition | undefined;
+  value: PermissionDefinition | undefined;
 }
 
 export interface EntityDefinition_ReferencesEntry {
@@ -155,36 +145,22 @@ export interface EntityDefinition_ReferencesEntry {
   value: EntityDefinition_RelationalReference;
 }
 
-export interface EntityDefinition_OptionEntry {
-  key: string;
-  value: string;
-}
-
 /** RelationDefinition */
 export interface RelationDefinition {
   name: string;
-  entityReference:
-    | RelationReference
-    | undefined;
-  /** relation reference includes entity reference */
   relationReferences: RelationReference[];
-  option: { [key: string]: string };
 }
 
-export interface RelationDefinition_OptionEntry {
-  key: string;
-  value: string;
-}
-
-/** ActionDefinition */
-export interface ActionDefinition {
+/** PermissionDefinition */
+export interface PermissionDefinition {
   name: string;
   child: Child | undefined;
 }
 
 /** RelationReference */
 export interface RelationReference {
-  name: string;
+  type: string;
+  relation: string;
 }
 
 /** ComputedUserSet */
@@ -270,19 +246,16 @@ export const Child = {
 };
 
 function createBaseLeaf(): Leaf {
-  return { exclusion: false, type: undefined };
+  return { type: undefined };
 }
 
 export const Leaf = {
   encode(message: Leaf, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.exclusion === true) {
-      writer.uint32(8).bool(message.exclusion);
-    }
     if (message.type?.$case === "computedUserSet") {
-      ComputedUserSet.encode(message.type.computedUserSet, writer.uint32(18).fork()).ldelim();
+      ComputedUserSet.encode(message.type.computedUserSet, writer.uint32(10).fork()).ldelim();
     }
     if (message.type?.$case === "tupleToUserSet") {
-      TupleToUserSet.encode(message.type.tupleToUserSet, writer.uint32(26).fork()).ldelim();
+      TupleToUserSet.encode(message.type.tupleToUserSet, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
@@ -295,12 +268,9 @@ export const Leaf = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.exclusion = reader.bool();
-          break;
-        case 2:
           message.type = { $case: "computedUserSet", computedUserSet: ComputedUserSet.decode(reader, reader.uint32()) };
           break;
-        case 3:
+        case 2:
           message.type = { $case: "tupleToUserSet", tupleToUserSet: TupleToUserSet.decode(reader, reader.uint32()) };
           break;
         default:
@@ -313,7 +283,6 @@ export const Leaf = {
 
   fromJSON(object: any): Leaf {
     return {
-      exclusion: isSet(object.exclusion) ? Boolean(object.exclusion) : false,
       type: isSet(object.computedUserSet)
         ? { $case: "computedUserSet", computedUserSet: ComputedUserSet.fromJSON(object.computedUserSet) }
         : isSet(object.tupleToUserSet)
@@ -324,7 +293,6 @@ export const Leaf = {
 
   toJSON(message: Leaf): unknown {
     const obj: any = {};
-    message.exclusion !== undefined && (obj.exclusion = message.exclusion);
     message.type?.$case === "computedUserSet" && (obj.computedUserSet = message.type?.computedUserSet
       ? ComputedUserSet.toJSON(message.type?.computedUserSet)
       : undefined);
@@ -336,7 +304,6 @@ export const Leaf = {
 
   fromPartial(object: DeepPartial<Leaf>): Leaf {
     const message = createBaseLeaf();
-    message.exclusion = object.exclusion ?? false;
     if (
       object.type?.$case === "computedUserSet" &&
       object.type?.computedUserSet !== undefined &&
@@ -424,47 +391,29 @@ export const Rewrite = {
   },
 };
 
-function createBaseIndexedSchema(): IndexedSchema {
-  return { entityDefinitions: {}, relationDefinitions: {}, actionDefinitions: {} };
+function createBaseSchemaDefinition(): SchemaDefinition {
+  return { entityDefinitions: {} };
 }
 
-export const IndexedSchema = {
-  encode(message: IndexedSchema, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const SchemaDefinition = {
+  encode(message: SchemaDefinition, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     Object.entries(message.entityDefinitions).forEach(([key, value]) => {
-      IndexedSchema_EntityDefinitionsEntry.encode({ key: key as any, value }, writer.uint32(10).fork()).ldelim();
-    });
-    Object.entries(message.relationDefinitions).forEach(([key, value]) => {
-      IndexedSchema_RelationDefinitionsEntry.encode({ key: key as any, value }, writer.uint32(18).fork()).ldelim();
-    });
-    Object.entries(message.actionDefinitions).forEach(([key, value]) => {
-      IndexedSchema_ActionDefinitionsEntry.encode({ key: key as any, value }, writer.uint32(26).fork()).ldelim();
+      SchemaDefinition_EntityDefinitionsEntry.encode({ key: key as any, value }, writer.uint32(10).fork()).ldelim();
     });
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): IndexedSchema {
+  decode(input: _m0.Reader | Uint8Array, length?: number): SchemaDefinition {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseIndexedSchema();
+    const message = createBaseSchemaDefinition();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          const entry1 = IndexedSchema_EntityDefinitionsEntry.decode(reader, reader.uint32());
+          const entry1 = SchemaDefinition_EntityDefinitionsEntry.decode(reader, reader.uint32());
           if (entry1.value !== undefined) {
             message.entityDefinitions[entry1.key] = entry1.value;
-          }
-          break;
-        case 2:
-          const entry2 = IndexedSchema_RelationDefinitionsEntry.decode(reader, reader.uint32());
-          if (entry2.value !== undefined) {
-            message.relationDefinitions[entry2.key] = entry2.value;
-          }
-          break;
-        case 3:
-          const entry3 = IndexedSchema_ActionDefinitionsEntry.decode(reader, reader.uint32());
-          if (entry3.value !== undefined) {
-            message.actionDefinitions[entry3.key] = entry3.value;
           }
           break;
         default:
@@ -475,7 +424,7 @@ export const IndexedSchema = {
     return message;
   },
 
-  fromJSON(object: any): IndexedSchema {
+  fromJSON(object: any): SchemaDefinition {
     return {
       entityDefinitions: isObject(object.entityDefinitions)
         ? Object.entries(object.entityDefinitions).reduce<{ [key: string]: EntityDefinition }>((acc, [key, value]) => {
@@ -483,25 +432,10 @@ export const IndexedSchema = {
           return acc;
         }, {})
         : {},
-      relationDefinitions: isObject(object.relationDefinitions)
-        ? Object.entries(object.relationDefinitions).reduce<{ [key: string]: RelationDefinition }>(
-          (acc, [key, value]) => {
-            acc[key] = RelationDefinition.fromJSON(value);
-            return acc;
-          },
-          {},
-        )
-        : {},
-      actionDefinitions: isObject(object.actionDefinitions)
-        ? Object.entries(object.actionDefinitions).reduce<{ [key: string]: ActionDefinition }>((acc, [key, value]) => {
-          acc[key] = ActionDefinition.fromJSON(value);
-          return acc;
-        }, {})
-        : {},
     };
   },
 
-  toJSON(message: IndexedSchema): unknown {
+  toJSON(message: SchemaDefinition): unknown {
     const obj: any = {};
     obj.entityDefinitions = {};
     if (message.entityDefinitions) {
@@ -509,23 +443,11 @@ export const IndexedSchema = {
         obj.entityDefinitions[k] = EntityDefinition.toJSON(v);
       });
     }
-    obj.relationDefinitions = {};
-    if (message.relationDefinitions) {
-      Object.entries(message.relationDefinitions).forEach(([k, v]) => {
-        obj.relationDefinitions[k] = RelationDefinition.toJSON(v);
-      });
-    }
-    obj.actionDefinitions = {};
-    if (message.actionDefinitions) {
-      Object.entries(message.actionDefinitions).forEach(([k, v]) => {
-        obj.actionDefinitions[k] = ActionDefinition.toJSON(v);
-      });
-    }
     return obj;
   },
 
-  fromPartial(object: DeepPartial<IndexedSchema>): IndexedSchema {
-    const message = createBaseIndexedSchema();
+  fromPartial(object: DeepPartial<SchemaDefinition>): SchemaDefinition {
+    const message = createBaseSchemaDefinition();
     message.entityDefinitions = Object.entries(object.entityDefinitions ?? {}).reduce<
       { [key: string]: EntityDefinition }
     >((acc, [key, value]) => {
@@ -534,32 +456,16 @@ export const IndexedSchema = {
       }
       return acc;
     }, {});
-    message.relationDefinitions = Object.entries(object.relationDefinitions ?? {}).reduce<
-      { [key: string]: RelationDefinition }
-    >((acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = RelationDefinition.fromPartial(value);
-      }
-      return acc;
-    }, {});
-    message.actionDefinitions = Object.entries(object.actionDefinitions ?? {}).reduce<
-      { [key: string]: ActionDefinition }
-    >((acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = ActionDefinition.fromPartial(value);
-      }
-      return acc;
-    }, {});
     return message;
   },
 };
 
-function createBaseIndexedSchema_EntityDefinitionsEntry(): IndexedSchema_EntityDefinitionsEntry {
+function createBaseSchemaDefinition_EntityDefinitionsEntry(): SchemaDefinition_EntityDefinitionsEntry {
   return { key: "", value: undefined };
 }
 
-export const IndexedSchema_EntityDefinitionsEntry = {
-  encode(message: IndexedSchema_EntityDefinitionsEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const SchemaDefinition_EntityDefinitionsEntry = {
+  encode(message: SchemaDefinition_EntityDefinitionsEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.key !== "") {
       writer.uint32(10).string(message.key);
     }
@@ -569,10 +475,10 @@ export const IndexedSchema_EntityDefinitionsEntry = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): IndexedSchema_EntityDefinitionsEntry {
+  decode(input: _m0.Reader | Uint8Array, length?: number): SchemaDefinition_EntityDefinitionsEntry {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseIndexedSchema_EntityDefinitionsEntry();
+    const message = createBaseSchemaDefinition_EntityDefinitionsEntry();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -590,22 +496,22 @@ export const IndexedSchema_EntityDefinitionsEntry = {
     return message;
   },
 
-  fromJSON(object: any): IndexedSchema_EntityDefinitionsEntry {
+  fromJSON(object: any): SchemaDefinition_EntityDefinitionsEntry {
     return {
       key: isSet(object.key) ? String(object.key) : "",
       value: isSet(object.value) ? EntityDefinition.fromJSON(object.value) : undefined,
     };
   },
 
-  toJSON(message: IndexedSchema_EntityDefinitionsEntry): unknown {
+  toJSON(message: SchemaDefinition_EntityDefinitionsEntry): unknown {
     const obj: any = {};
     message.key !== undefined && (obj.key = message.key);
     message.value !== undefined && (obj.value = message.value ? EntityDefinition.toJSON(message.value) : undefined);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<IndexedSchema_EntityDefinitionsEntry>): IndexedSchema_EntityDefinitionsEntry {
-    const message = createBaseIndexedSchema_EntityDefinitionsEntry();
+  fromPartial(object: DeepPartial<SchemaDefinition_EntityDefinitionsEntry>): SchemaDefinition_EntityDefinitionsEntry {
+    const message = createBaseSchemaDefinition_EntityDefinitionsEntry();
     message.key = object.key ?? "";
     message.value = (object.value !== undefined && object.value !== null)
       ? EntityDefinition.fromPartial(object.value)
@@ -614,128 +520,8 @@ export const IndexedSchema_EntityDefinitionsEntry = {
   },
 };
 
-function createBaseIndexedSchema_RelationDefinitionsEntry(): IndexedSchema_RelationDefinitionsEntry {
-  return { key: "", value: undefined };
-}
-
-export const IndexedSchema_RelationDefinitionsEntry = {
-  encode(message: IndexedSchema_RelationDefinitionsEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.key !== "") {
-      writer.uint32(10).string(message.key);
-    }
-    if (message.value !== undefined) {
-      RelationDefinition.encode(message.value, writer.uint32(18).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): IndexedSchema_RelationDefinitionsEntry {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseIndexedSchema_RelationDefinitionsEntry();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.key = reader.string();
-          break;
-        case 2:
-          message.value = RelationDefinition.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): IndexedSchema_RelationDefinitionsEntry {
-    return {
-      key: isSet(object.key) ? String(object.key) : "",
-      value: isSet(object.value) ? RelationDefinition.fromJSON(object.value) : undefined,
-    };
-  },
-
-  toJSON(message: IndexedSchema_RelationDefinitionsEntry): unknown {
-    const obj: any = {};
-    message.key !== undefined && (obj.key = message.key);
-    message.value !== undefined && (obj.value = message.value ? RelationDefinition.toJSON(message.value) : undefined);
-    return obj;
-  },
-
-  fromPartial(object: DeepPartial<IndexedSchema_RelationDefinitionsEntry>): IndexedSchema_RelationDefinitionsEntry {
-    const message = createBaseIndexedSchema_RelationDefinitionsEntry();
-    message.key = object.key ?? "";
-    message.value = (object.value !== undefined && object.value !== null)
-      ? RelationDefinition.fromPartial(object.value)
-      : undefined;
-    return message;
-  },
-};
-
-function createBaseIndexedSchema_ActionDefinitionsEntry(): IndexedSchema_ActionDefinitionsEntry {
-  return { key: "", value: undefined };
-}
-
-export const IndexedSchema_ActionDefinitionsEntry = {
-  encode(message: IndexedSchema_ActionDefinitionsEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.key !== "") {
-      writer.uint32(10).string(message.key);
-    }
-    if (message.value !== undefined) {
-      ActionDefinition.encode(message.value, writer.uint32(18).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): IndexedSchema_ActionDefinitionsEntry {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseIndexedSchema_ActionDefinitionsEntry();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.key = reader.string();
-          break;
-        case 2:
-          message.value = ActionDefinition.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): IndexedSchema_ActionDefinitionsEntry {
-    return {
-      key: isSet(object.key) ? String(object.key) : "",
-      value: isSet(object.value) ? ActionDefinition.fromJSON(object.value) : undefined,
-    };
-  },
-
-  toJSON(message: IndexedSchema_ActionDefinitionsEntry): unknown {
-    const obj: any = {};
-    message.key !== undefined && (obj.key = message.key);
-    message.value !== undefined && (obj.value = message.value ? ActionDefinition.toJSON(message.value) : undefined);
-    return obj;
-  },
-
-  fromPartial(object: DeepPartial<IndexedSchema_ActionDefinitionsEntry>): IndexedSchema_ActionDefinitionsEntry {
-    const message = createBaseIndexedSchema_ActionDefinitionsEntry();
-    message.key = object.key ?? "";
-    message.value = (object.value !== undefined && object.value !== null)
-      ? ActionDefinition.fromPartial(object.value)
-      : undefined;
-    return message;
-  },
-};
-
 function createBaseEntityDefinition(): EntityDefinition {
-  return { name: "", relations: {}, actions: {}, references: {}, option: {} };
+  return { name: "", relations: {}, permissions: {}, references: {} };
 }
 
 export const EntityDefinition = {
@@ -746,14 +532,11 @@ export const EntityDefinition = {
     Object.entries(message.relations).forEach(([key, value]) => {
       EntityDefinition_RelationsEntry.encode({ key: key as any, value }, writer.uint32(18).fork()).ldelim();
     });
-    Object.entries(message.actions).forEach(([key, value]) => {
-      EntityDefinition_ActionsEntry.encode({ key: key as any, value }, writer.uint32(26).fork()).ldelim();
+    Object.entries(message.permissions).forEach(([key, value]) => {
+      EntityDefinition_PermissionsEntry.encode({ key: key as any, value }, writer.uint32(26).fork()).ldelim();
     });
     Object.entries(message.references).forEach(([key, value]) => {
       EntityDefinition_ReferencesEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).ldelim();
-    });
-    Object.entries(message.option).forEach(([key, value]) => {
-      EntityDefinition_OptionEntry.encode({ key: key as any, value }, writer.uint32(42).fork()).ldelim();
     });
     return writer;
   },
@@ -775,21 +558,15 @@ export const EntityDefinition = {
           }
           break;
         case 3:
-          const entry3 = EntityDefinition_ActionsEntry.decode(reader, reader.uint32());
+          const entry3 = EntityDefinition_PermissionsEntry.decode(reader, reader.uint32());
           if (entry3.value !== undefined) {
-            message.actions[entry3.key] = entry3.value;
+            message.permissions[entry3.key] = entry3.value;
           }
           break;
         case 4:
           const entry4 = EntityDefinition_ReferencesEntry.decode(reader, reader.uint32());
           if (entry4.value !== undefined) {
             message.references[entry4.key] = entry4.value;
-          }
-          break;
-        case 5:
-          const entry5 = EntityDefinition_OptionEntry.decode(reader, reader.uint32());
-          if (entry5.value !== undefined) {
-            message.option[entry5.key] = entry5.value;
           }
           break;
         default:
@@ -809,9 +586,9 @@ export const EntityDefinition = {
           return acc;
         }, {})
         : {},
-      actions: isObject(object.actions)
-        ? Object.entries(object.actions).reduce<{ [key: string]: ActionDefinition }>((acc, [key, value]) => {
-          acc[key] = ActionDefinition.fromJSON(value);
+      permissions: isObject(object.permissions)
+        ? Object.entries(object.permissions).reduce<{ [key: string]: PermissionDefinition }>((acc, [key, value]) => {
+          acc[key] = PermissionDefinition.fromJSON(value);
           return acc;
         }, {})
         : {},
@@ -823,12 +600,6 @@ export const EntityDefinition = {
           },
           {},
         )
-        : {},
-      option: isObject(object.option)
-        ? Object.entries(object.option).reduce<{ [key: string]: string }>((acc, [key, value]) => {
-          acc[key] = String(value);
-          return acc;
-        }, {})
         : {},
     };
   },
@@ -842,22 +613,16 @@ export const EntityDefinition = {
         obj.relations[k] = RelationDefinition.toJSON(v);
       });
     }
-    obj.actions = {};
-    if (message.actions) {
-      Object.entries(message.actions).forEach(([k, v]) => {
-        obj.actions[k] = ActionDefinition.toJSON(v);
+    obj.permissions = {};
+    if (message.permissions) {
+      Object.entries(message.permissions).forEach(([k, v]) => {
+        obj.permissions[k] = PermissionDefinition.toJSON(v);
       });
     }
     obj.references = {};
     if (message.references) {
       Object.entries(message.references).forEach(([k, v]) => {
         obj.references[k] = entityDefinition_RelationalReferenceToJSON(v);
-      });
-    }
-    obj.option = {};
-    if (message.option) {
-      Object.entries(message.option).forEach(([k, v]) => {
-        obj.option[k] = v;
       });
     }
     return obj;
@@ -875,10 +640,10 @@ export const EntityDefinition = {
       },
       {},
     );
-    message.actions = Object.entries(object.actions ?? {}).reduce<{ [key: string]: ActionDefinition }>(
+    message.permissions = Object.entries(object.permissions ?? {}).reduce<{ [key: string]: PermissionDefinition }>(
       (acc, [key, value]) => {
         if (value !== undefined) {
-          acc[key] = ActionDefinition.fromPartial(value);
+          acc[key] = PermissionDefinition.fromPartial(value);
         }
         return acc;
       },
@@ -889,12 +654,6 @@ export const EntityDefinition = {
     >((acc, [key, value]) => {
       if (value !== undefined) {
         acc[key] = value as EntityDefinition_RelationalReference;
-      }
-      return acc;
-    }, {});
-    message.option = Object.entries(object.option ?? {}).reduce<{ [key: string]: string }>((acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = String(value);
       }
       return acc;
     }, {});
@@ -962,25 +721,25 @@ export const EntityDefinition_RelationsEntry = {
   },
 };
 
-function createBaseEntityDefinition_ActionsEntry(): EntityDefinition_ActionsEntry {
+function createBaseEntityDefinition_PermissionsEntry(): EntityDefinition_PermissionsEntry {
   return { key: "", value: undefined };
 }
 
-export const EntityDefinition_ActionsEntry = {
-  encode(message: EntityDefinition_ActionsEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const EntityDefinition_PermissionsEntry = {
+  encode(message: EntityDefinition_PermissionsEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.key !== "") {
       writer.uint32(10).string(message.key);
     }
     if (message.value !== undefined) {
-      ActionDefinition.encode(message.value, writer.uint32(18).fork()).ldelim();
+      PermissionDefinition.encode(message.value, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): EntityDefinition_ActionsEntry {
+  decode(input: _m0.Reader | Uint8Array, length?: number): EntityDefinition_PermissionsEntry {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseEntityDefinition_ActionsEntry();
+    const message = createBaseEntityDefinition_PermissionsEntry();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -988,7 +747,7 @@ export const EntityDefinition_ActionsEntry = {
           message.key = reader.string();
           break;
         case 2:
-          message.value = ActionDefinition.decode(reader, reader.uint32());
+          message.value = PermissionDefinition.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -998,25 +757,25 @@ export const EntityDefinition_ActionsEntry = {
     return message;
   },
 
-  fromJSON(object: any): EntityDefinition_ActionsEntry {
+  fromJSON(object: any): EntityDefinition_PermissionsEntry {
     return {
       key: isSet(object.key) ? String(object.key) : "",
-      value: isSet(object.value) ? ActionDefinition.fromJSON(object.value) : undefined,
+      value: isSet(object.value) ? PermissionDefinition.fromJSON(object.value) : undefined,
     };
   },
 
-  toJSON(message: EntityDefinition_ActionsEntry): unknown {
+  toJSON(message: EntityDefinition_PermissionsEntry): unknown {
     const obj: any = {};
     message.key !== undefined && (obj.key = message.key);
-    message.value !== undefined && (obj.value = message.value ? ActionDefinition.toJSON(message.value) : undefined);
+    message.value !== undefined && (obj.value = message.value ? PermissionDefinition.toJSON(message.value) : undefined);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<EntityDefinition_ActionsEntry>): EntityDefinition_ActionsEntry {
-    const message = createBaseEntityDefinition_ActionsEntry();
+  fromPartial(object: DeepPartial<EntityDefinition_PermissionsEntry>): EntityDefinition_PermissionsEntry {
+    const message = createBaseEntityDefinition_PermissionsEntry();
     message.key = object.key ?? "";
     message.value = (object.value !== undefined && object.value !== null)
-      ? ActionDefinition.fromPartial(object.value)
+      ? PermissionDefinition.fromPartial(object.value)
       : undefined;
     return message;
   },
@@ -1080,63 +839,8 @@ export const EntityDefinition_ReferencesEntry = {
   },
 };
 
-function createBaseEntityDefinition_OptionEntry(): EntityDefinition_OptionEntry {
-  return { key: "", value: "" };
-}
-
-export const EntityDefinition_OptionEntry = {
-  encode(message: EntityDefinition_OptionEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.key !== "") {
-      writer.uint32(10).string(message.key);
-    }
-    if (message.value !== "") {
-      writer.uint32(18).string(message.value);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): EntityDefinition_OptionEntry {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseEntityDefinition_OptionEntry();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.key = reader.string();
-          break;
-        case 2:
-          message.value = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): EntityDefinition_OptionEntry {
-    return { key: isSet(object.key) ? String(object.key) : "", value: isSet(object.value) ? String(object.value) : "" };
-  },
-
-  toJSON(message: EntityDefinition_OptionEntry): unknown {
-    const obj: any = {};
-    message.key !== undefined && (obj.key = message.key);
-    message.value !== undefined && (obj.value = message.value);
-    return obj;
-  },
-
-  fromPartial(object: DeepPartial<EntityDefinition_OptionEntry>): EntityDefinition_OptionEntry {
-    const message = createBaseEntityDefinition_OptionEntry();
-    message.key = object.key ?? "";
-    message.value = object.value ?? "";
-    return message;
-  },
-};
-
 function createBaseRelationDefinition(): RelationDefinition {
-  return { name: "", entityReference: undefined, relationReferences: [], option: {} };
+  return { name: "", relationReferences: [] };
 }
 
 export const RelationDefinition = {
@@ -1144,15 +848,9 @@ export const RelationDefinition = {
     if (message.name !== "") {
       writer.uint32(10).string(message.name);
     }
-    if (message.entityReference !== undefined) {
-      RelationReference.encode(message.entityReference, writer.uint32(18).fork()).ldelim();
-    }
     for (const v of message.relationReferences) {
-      RelationReference.encode(v!, writer.uint32(26).fork()).ldelim();
+      RelationReference.encode(v!, writer.uint32(18).fork()).ldelim();
     }
-    Object.entries(message.option).forEach(([key, value]) => {
-      RelationDefinition_OptionEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).ldelim();
-    });
     return writer;
   },
 
@@ -1167,16 +865,7 @@ export const RelationDefinition = {
           message.name = reader.string();
           break;
         case 2:
-          message.entityReference = RelationReference.decode(reader, reader.uint32());
-          break;
-        case 3:
           message.relationReferences.push(RelationReference.decode(reader, reader.uint32()));
-          break;
-        case 4:
-          const entry4 = RelationDefinition_OptionEntry.decode(reader, reader.uint32());
-          if (entry4.value !== undefined) {
-            message.option[entry4.key] = entry4.value;
-          }
           break;
         default:
           reader.skipType(tag & 7);
@@ -1189,34 +878,19 @@ export const RelationDefinition = {
   fromJSON(object: any): RelationDefinition {
     return {
       name: isSet(object.name) ? String(object.name) : "",
-      entityReference: isSet(object.entityReference) ? RelationReference.fromJSON(object.entityReference) : undefined,
       relationReferences: Array.isArray(object?.relationReferences)
         ? object.relationReferences.map((e: any) => RelationReference.fromJSON(e))
         : [],
-      option: isObject(object.option)
-        ? Object.entries(object.option).reduce<{ [key: string]: string }>((acc, [key, value]) => {
-          acc[key] = String(value);
-          return acc;
-        }, {})
-        : {},
     };
   },
 
   toJSON(message: RelationDefinition): unknown {
     const obj: any = {};
     message.name !== undefined && (obj.name = message.name);
-    message.entityReference !== undefined &&
-      (obj.entityReference = message.entityReference ? RelationReference.toJSON(message.entityReference) : undefined);
     if (message.relationReferences) {
       obj.relationReferences = message.relationReferences.map((e) => e ? RelationReference.toJSON(e) : undefined);
     } else {
       obj.relationReferences = [];
-    }
-    obj.option = {};
-    if (message.option) {
-      Object.entries(message.option).forEach(([k, v]) => {
-        obj.option[k] = v;
-      });
     }
     return obj;
   },
@@ -1224,81 +898,17 @@ export const RelationDefinition = {
   fromPartial(object: DeepPartial<RelationDefinition>): RelationDefinition {
     const message = createBaseRelationDefinition();
     message.name = object.name ?? "";
-    message.entityReference = (object.entityReference !== undefined && object.entityReference !== null)
-      ? RelationReference.fromPartial(object.entityReference)
-      : undefined;
     message.relationReferences = object.relationReferences?.map((e) => RelationReference.fromPartial(e)) || [];
-    message.option = Object.entries(object.option ?? {}).reduce<{ [key: string]: string }>((acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = String(value);
-      }
-      return acc;
-    }, {});
     return message;
   },
 };
 
-function createBaseRelationDefinition_OptionEntry(): RelationDefinition_OptionEntry {
-  return { key: "", value: "" };
-}
-
-export const RelationDefinition_OptionEntry = {
-  encode(message: RelationDefinition_OptionEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.key !== "") {
-      writer.uint32(10).string(message.key);
-    }
-    if (message.value !== "") {
-      writer.uint32(18).string(message.value);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): RelationDefinition_OptionEntry {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseRelationDefinition_OptionEntry();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.key = reader.string();
-          break;
-        case 2:
-          message.value = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): RelationDefinition_OptionEntry {
-    return { key: isSet(object.key) ? String(object.key) : "", value: isSet(object.value) ? String(object.value) : "" };
-  },
-
-  toJSON(message: RelationDefinition_OptionEntry): unknown {
-    const obj: any = {};
-    message.key !== undefined && (obj.key = message.key);
-    message.value !== undefined && (obj.value = message.value);
-    return obj;
-  },
-
-  fromPartial(object: DeepPartial<RelationDefinition_OptionEntry>): RelationDefinition_OptionEntry {
-    const message = createBaseRelationDefinition_OptionEntry();
-    message.key = object.key ?? "";
-    message.value = object.value ?? "";
-    return message;
-  },
-};
-
-function createBaseActionDefinition(): ActionDefinition {
+function createBasePermissionDefinition(): PermissionDefinition {
   return { name: "", child: undefined };
 }
 
-export const ActionDefinition = {
-  encode(message: ActionDefinition, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const PermissionDefinition = {
+  encode(message: PermissionDefinition, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.name !== "") {
       writer.uint32(10).string(message.name);
     }
@@ -1308,10 +918,10 @@ export const ActionDefinition = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): ActionDefinition {
+  decode(input: _m0.Reader | Uint8Array, length?: number): PermissionDefinition {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseActionDefinition();
+    const message = createBasePermissionDefinition();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -1329,22 +939,22 @@ export const ActionDefinition = {
     return message;
   },
 
-  fromJSON(object: any): ActionDefinition {
+  fromJSON(object: any): PermissionDefinition {
     return {
       name: isSet(object.name) ? String(object.name) : "",
       child: isSet(object.child) ? Child.fromJSON(object.child) : undefined,
     };
   },
 
-  toJSON(message: ActionDefinition): unknown {
+  toJSON(message: PermissionDefinition): unknown {
     const obj: any = {};
     message.name !== undefined && (obj.name = message.name);
     message.child !== undefined && (obj.child = message.child ? Child.toJSON(message.child) : undefined);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<ActionDefinition>): ActionDefinition {
-    const message = createBaseActionDefinition();
+  fromPartial(object: DeepPartial<PermissionDefinition>): PermissionDefinition {
+    const message = createBasePermissionDefinition();
     message.name = object.name ?? "";
     message.child = (object.child !== undefined && object.child !== null) ? Child.fromPartial(object.child) : undefined;
     return message;
@@ -1352,13 +962,16 @@ export const ActionDefinition = {
 };
 
 function createBaseRelationReference(): RelationReference {
-  return { name: "" };
+  return { type: "", relation: "" };
 }
 
 export const RelationReference = {
   encode(message: RelationReference, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.name !== "") {
-      writer.uint32(10).string(message.name);
+    if (message.type !== "") {
+      writer.uint32(10).string(message.type);
+    }
+    if (message.relation !== "") {
+      writer.uint32(18).string(message.relation);
     }
     return writer;
   },
@@ -1371,7 +984,10 @@ export const RelationReference = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.name = reader.string();
+          message.type = reader.string();
+          break;
+        case 2:
+          message.relation = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -1382,18 +998,23 @@ export const RelationReference = {
   },
 
   fromJSON(object: any): RelationReference {
-    return { name: isSet(object.name) ? String(object.name) : "" };
+    return {
+      type: isSet(object.type) ? String(object.type) : "",
+      relation: isSet(object.relation) ? String(object.relation) : "",
+    };
   },
 
   toJSON(message: RelationReference): unknown {
     const obj: any = {};
-    message.name !== undefined && (obj.name = message.name);
+    message.type !== undefined && (obj.type = message.type);
+    message.relation !== undefined && (obj.relation = message.relation);
     return obj;
   },
 
   fromPartial(object: DeepPartial<RelationReference>): RelationReference {
     const message = createBaseRelationReference();
-    message.name = object.name ?? "";
+    message.type = object.type ?? "";
+    message.relation = object.relation ?? "";
     return message;
   },
 };
