@@ -53,6 +53,7 @@ export enum ErrorCode {
   ERROR_CODE_ERROR_MAX_RETRIES = 5009,
   ERROR_CODE_ROLLBACK = 5010,
   ERROR_CODE_EXCLUSION_REQUIRES_MORE_THAN_ONE_FUNCTION = 5011,
+  ERROR_CODE_NOT_IMPLEMENTED = 5012,
   UNRECOGNIZED = -1,
 }
 
@@ -190,6 +191,9 @@ export function errorCodeFromJSON(object: any): ErrorCode {
     case 5011:
     case "ERROR_CODE_EXCLUSION_REQUIRES_MORE_THAN_ONE_FUNCTION":
       return ErrorCode.ERROR_CODE_EXCLUSION_REQUIRES_MORE_THAN_ONE_FUNCTION;
+    case 5012:
+    case "ERROR_CODE_NOT_IMPLEMENTED":
+      return ErrorCode.ERROR_CODE_NOT_IMPLEMENTED;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -287,6 +291,8 @@ export function errorCodeToJSON(object: ErrorCode): string {
       return "ERROR_CODE_ROLLBACK";
     case ErrorCode.ERROR_CODE_EXCLUSION_REQUIRES_MORE_THAN_ONE_FUNCTION:
       return "ERROR_CODE_EXCLUSION_REQUIRES_MORE_THAN_ONE_FUNCTION";
+    case ErrorCode.ERROR_CODE_NOT_IMPLEMENTED:
+      return "ERROR_CODE_NOT_IMPLEMENTED";
     case ErrorCode.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";

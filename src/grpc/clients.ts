@@ -4,7 +4,8 @@ import {
     PermissionDefinition,
     SchemaDefinition,
     RelationshipDefinition,
-    TenancyDefinition
+    TenancyDefinition,
+    WatchDefinition
 } from './generated/base/v1/service';
 import {Config} from "./config";
 
@@ -34,5 +35,6 @@ export function newClient(conf: Config, ...interceptors: ClientMiddleware[]) {
         schema: factory.create(SchemaDefinition, channel),
         relationship: factory.create(RelationshipDefinition, channel),
         tenancy: factory.create(TenancyDefinition, channel),
+        watch: factory.create(WatchDefinition, channel)
     };
 }

@@ -2,8 +2,17 @@
 import Long from "long";
 import type { CallContext, CallOptions } from "nice-grpc-common";
 import _m0 from "protobufjs/minimal";
-import { RelationReference, SchemaDefinition as SchemaDefinition1 } from "./schema";
-import { Entity, Expand, Subject, Tenant, Tuple, TupleFilter } from "./tuple";
+import {
+  Entity,
+  Expand,
+  RelationReference,
+  SchemaDefinition as SchemaDefinition1,
+  Subject,
+  Tenant,
+  Tuple,
+  TupleChanges,
+  TupleFilter,
+} from "./base";
 
 export const protobufPackage = "base.v1";
 
@@ -158,6 +167,17 @@ export interface PermissionLookupSubjectRequestMetadata {
 /** PermissionLookupSubjectResponse */
 export interface PermissionLookupSubjectResponse {
   subjectIds: string[];
+}
+
+/** WatchRequest */
+export interface WatchRequest {
+  tenantId: string;
+  snapToken: string;
+}
+
+/** WatchResponse */
+export interface WatchResponse {
+  changes: TupleChanges | undefined;
 }
 
 /** SchemaWriteRequest */
@@ -1333,6 +1353,113 @@ export const PermissionLookupSubjectResponse = {
   },
 };
 
+function createBaseWatchRequest(): WatchRequest {
+  return { tenantId: "", snapToken: "" };
+}
+
+export const WatchRequest = {
+  encode(message: WatchRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
+    if (message.snapToken !== "") {
+      writer.uint32(18).string(message.snapToken);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): WatchRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWatchRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.tenantId = reader.string();
+          break;
+        case 2:
+          message.snapToken = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WatchRequest {
+    return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
+      snapToken: isSet(object.snap_token) ? String(object.snap_token) : "",
+    };
+  },
+
+  toJSON(message: WatchRequest): unknown {
+    const obj: any = {};
+    message.tenantId !== undefined && (obj.tenant_id = message.tenantId);
+    message.snapToken !== undefined && (obj.snap_token = message.snapToken);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<WatchRequest>): WatchRequest {
+    const message = createBaseWatchRequest();
+    message.tenantId = object.tenantId ?? "";
+    message.snapToken = object.snapToken ?? "";
+    return message;
+  },
+};
+
+function createBaseWatchResponse(): WatchResponse {
+  return { changes: undefined };
+}
+
+export const WatchResponse = {
+  encode(message: WatchResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.changes !== undefined) {
+      TupleChanges.encode(message.changes, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): WatchResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWatchResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.changes = TupleChanges.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WatchResponse {
+    return { changes: isSet(object.changes) ? TupleChanges.fromJSON(object.changes) : undefined };
+  },
+
+  toJSON(message: WatchResponse): unknown {
+    const obj: any = {};
+    message.changes !== undefined && (obj.changes = message.changes ? TupleChanges.toJSON(message.changes) : undefined);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<WatchResponse>): WatchResponse {
+    const message = createBaseWatchResponse();
+    message.changes = (object.changes !== undefined && object.changes !== null)
+      ? TupleChanges.fromPartial(object.changes)
+      : undefined;
+    return message;
+  },
+};
+
 function createBaseSchemaWriteRequest(): SchemaWriteRequest {
   return { tenantId: "", schema: "" };
 }
@@ -2483,6 +2610,34 @@ export interface PermissionClient<CallOptionsExt = {}> {
     request: DeepPartial<PermissionLookupSubjectRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<PermissionLookupSubjectResponse>;
+}
+
+/** Watch */
+export type WatchDefinition = typeof WatchDefinition;
+export const WatchDefinition = {
+  name: "Watch",
+  fullName: "base.v1.Watch",
+  methods: {
+    watch: {
+      name: "Watch",
+      requestType: WatchRequest,
+      requestStream: false,
+      responseType: WatchResponse,
+      responseStream: true,
+      options: {},
+    },
+  },
+} as const;
+
+export interface WatchServiceImplementation<CallContextExt = {}> {
+  watch(
+    request: WatchRequest,
+    context: CallContext & CallContextExt,
+  ): ServerStreamingMethodResult<DeepPartial<WatchResponse>>;
+}
+
+export interface WatchClient<CallOptionsExt = {}> {
+  watch(request: DeepPartial<WatchRequest>, options?: CallOptions & CallOptionsExt): AsyncIterable<WatchResponse>;
 }
 
 /** Schema */
