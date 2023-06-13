@@ -217,12 +217,6 @@ export interface TupleFilter {
   subject: SubjectFilter | undefined;
 }
 
-/** EntityAndRelationFilter is used to filter entities and relations */
-export interface EntityAndRelationFilter {
-  entity: EntityFilter | undefined;
-  relation: string;
-}
-
 /** EntityFilter is used to filter entities */
 export interface EntityFilter {
   type: string;
@@ -1726,66 +1720,6 @@ export const TupleFilter = {
     message.subject = (object.subject !== undefined && object.subject !== null)
       ? SubjectFilter.fromPartial(object.subject)
       : undefined;
-    return message;
-  },
-};
-
-function createBaseEntityAndRelationFilter(): EntityAndRelationFilter {
-  return { entity: undefined, relation: "" };
-}
-
-export const EntityAndRelationFilter = {
-  encode(message: EntityAndRelationFilter, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.entity !== undefined) {
-      EntityFilter.encode(message.entity, writer.uint32(10).fork()).ldelim();
-    }
-    if (message.relation !== "") {
-      writer.uint32(18).string(message.relation);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): EntityAndRelationFilter {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseEntityAndRelationFilter();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.entity = EntityFilter.decode(reader, reader.uint32());
-          break;
-        case 2:
-          message.relation = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): EntityAndRelationFilter {
-    return {
-      entity: isSet(object.entity) ? EntityFilter.fromJSON(object.entity) : undefined,
-      relation: isSet(object.relation) ? String(object.relation) : "",
-    };
-  },
-
-  toJSON(message: EntityAndRelationFilter): unknown {
-    const obj: any = {};
-    message.entity !== undefined && (obj.entity = message.entity ? EntityFilter.toJSON(message.entity) : undefined);
-    message.relation !== undefined && (obj.relation = message.relation);
-    return obj;
-  },
-
-  fromPartial(object: DeepPartial<EntityAndRelationFilter>): EntityAndRelationFilter {
-    const message = createBaseEntityAndRelationFilter();
-    message.entity = (object.entity !== undefined && object.entity !== null)
-      ? EntityFilter.fromPartial(object.entity)
-      : undefined;
-    message.relation = object.relation ?? "";
     return message;
   },
 };

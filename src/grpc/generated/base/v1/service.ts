@@ -26,6 +26,7 @@ export interface PermissionCheckRequest {
   /** its can be permission or relation */
   permission: string;
   subject: Subject | undefined;
+  contextualTuples: Tuple[];
 }
 
 /** PermissionCheckRequestMetadata */
@@ -92,6 +93,7 @@ export interface PermissionExpandRequest {
   metadata: PermissionExpandRequestMetadata | undefined;
   entity: Entity | undefined;
   permission: string;
+  contextualTuples: Tuple[];
 }
 
 /** PermissionExpandRequestMetadata */
@@ -112,6 +114,7 @@ export interface PermissionLookupEntityRequest {
   entityType: string;
   permission: string;
   subject: Subject | undefined;
+  contextualTuples: Tuple[];
 }
 
 /** PermissionLookupEntityRequestMetadata */
@@ -137,9 +140,10 @@ export interface PermissionEntityFilterRequest {
   metadata: PermissionEntityFilterRequestMetadata | undefined;
   entityReference: RelationReference | undefined;
   subject: Subject | undefined;
+  contextualTuples: Tuple[];
 }
 
-/** PermissionLookupEntityRequestMetadata */
+/** PermissionEntityFilterRequestMetadata */
 export interface PermissionEntityFilterRequestMetadata {
   schemaVersion: string;
   snapToken: string;
@@ -156,6 +160,7 @@ export interface PermissionLookupSubjectRequest {
   /** its can be permission or relation */
   permission: string;
   subjectReference: RelationReference | undefined;
+  contextualTuples: Tuple[];
 }
 
 /** PermissionLookupSubjectRequestMetadata */
@@ -289,7 +294,14 @@ export interface TenantListResponse {
 }
 
 function createBasePermissionCheckRequest(): PermissionCheckRequest {
-  return { tenantId: "", metadata: undefined, entity: undefined, permission: "", subject: undefined };
+  return {
+    tenantId: "",
+    metadata: undefined,
+    entity: undefined,
+    permission: "",
+    subject: undefined,
+    contextualTuples: [],
+  };
 }
 
 export const PermissionCheckRequest = {
@@ -308,6 +320,9 @@ export const PermissionCheckRequest = {
     }
     if (message.subject !== undefined) {
       Subject.encode(message.subject, writer.uint32(42).fork()).ldelim();
+    }
+    for (const v of message.contextualTuples) {
+      Tuple.encode(v!, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -334,6 +349,9 @@ export const PermissionCheckRequest = {
         case 5:
           message.subject = Subject.decode(reader, reader.uint32());
           break;
+        case 6:
+          message.contextualTuples.push(Tuple.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -349,6 +367,9 @@ export const PermissionCheckRequest = {
       entity: isSet(object.entity) ? Entity.fromJSON(object.entity) : undefined,
       permission: isSet(object.permission) ? String(object.permission) : "",
       subject: isSet(object.subject) ? Subject.fromJSON(object.subject) : undefined,
+      contextualTuples: Array.isArray(object?.contextual_tuples)
+        ? object.contextual_tuples.map((e: any) => Tuple.fromJSON(e))
+        : [],
     };
   },
 
@@ -360,6 +381,11 @@ export const PermissionCheckRequest = {
     message.entity !== undefined && (obj.entity = message.entity ? Entity.toJSON(message.entity) : undefined);
     message.permission !== undefined && (obj.permission = message.permission);
     message.subject !== undefined && (obj.subject = message.subject ? Subject.toJSON(message.subject) : undefined);
+    if (message.contextualTuples) {
+      obj.contextual_tuples = message.contextualTuples.map((e) => e ? Tuple.toJSON(e) : undefined);
+    } else {
+      obj.contextual_tuples = [];
+    }
     return obj;
   },
 
@@ -376,6 +402,7 @@ export const PermissionCheckRequest = {
     message.subject = (object.subject !== undefined && object.subject !== null)
       ? Subject.fromPartial(object.subject)
       : undefined;
+    message.contextualTuples = object.contextualTuples?.map((e) => Tuple.fromPartial(e)) || [];
     return message;
   },
 };
@@ -556,7 +583,7 @@ export const PermissionCheckResponseMetadata = {
 };
 
 function createBasePermissionExpandRequest(): PermissionExpandRequest {
-  return { tenantId: "", metadata: undefined, entity: undefined, permission: "" };
+  return { tenantId: "", metadata: undefined, entity: undefined, permission: "", contextualTuples: [] };
 }
 
 export const PermissionExpandRequest = {
@@ -572,6 +599,9 @@ export const PermissionExpandRequest = {
     }
     if (message.permission !== "") {
       writer.uint32(34).string(message.permission);
+    }
+    for (const v of message.contextualTuples) {
+      Tuple.encode(v!, writer.uint32(42).fork()).ldelim();
     }
     return writer;
   },
@@ -595,6 +625,9 @@ export const PermissionExpandRequest = {
         case 4:
           message.permission = reader.string();
           break;
+        case 5:
+          message.contextualTuples.push(Tuple.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -609,6 +642,9 @@ export const PermissionExpandRequest = {
       metadata: isSet(object.metadata) ? PermissionExpandRequestMetadata.fromJSON(object.metadata) : undefined,
       entity: isSet(object.entity) ? Entity.fromJSON(object.entity) : undefined,
       permission: isSet(object.permission) ? String(object.permission) : "",
+      contextualTuples: Array.isArray(object?.contextual_tuples)
+        ? object.contextual_tuples.map((e: any) => Tuple.fromJSON(e))
+        : [],
     };
   },
 
@@ -619,6 +655,11 @@ export const PermissionExpandRequest = {
       (obj.metadata = message.metadata ? PermissionExpandRequestMetadata.toJSON(message.metadata) : undefined);
     message.entity !== undefined && (obj.entity = message.entity ? Entity.toJSON(message.entity) : undefined);
     message.permission !== undefined && (obj.permission = message.permission);
+    if (message.contextualTuples) {
+      obj.contextual_tuples = message.contextualTuples.map((e) => e ? Tuple.toJSON(e) : undefined);
+    } else {
+      obj.contextual_tuples = [];
+    }
     return obj;
   },
 
@@ -632,6 +673,7 @@ export const PermissionExpandRequest = {
       ? Entity.fromPartial(object.entity)
       : undefined;
     message.permission = object.permission ?? "";
+    message.contextualTuples = object.contextualTuples?.map((e) => Tuple.fromPartial(e)) || [];
     return message;
   },
 };
@@ -742,7 +784,14 @@ export const PermissionExpandResponse = {
 };
 
 function createBasePermissionLookupEntityRequest(): PermissionLookupEntityRequest {
-  return { tenantId: "", metadata: undefined, entityType: "", permission: "", subject: undefined };
+  return {
+    tenantId: "",
+    metadata: undefined,
+    entityType: "",
+    permission: "",
+    subject: undefined,
+    contextualTuples: [],
+  };
 }
 
 export const PermissionLookupEntityRequest = {
@@ -761,6 +810,9 @@ export const PermissionLookupEntityRequest = {
     }
     if (message.subject !== undefined) {
       Subject.encode(message.subject, writer.uint32(42).fork()).ldelim();
+    }
+    for (const v of message.contextualTuples) {
+      Tuple.encode(v!, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -787,6 +839,9 @@ export const PermissionLookupEntityRequest = {
         case 5:
           message.subject = Subject.decode(reader, reader.uint32());
           break;
+        case 6:
+          message.contextualTuples.push(Tuple.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -802,6 +857,9 @@ export const PermissionLookupEntityRequest = {
       entityType: isSet(object.entity_type) ? String(object.entity_type) : "",
       permission: isSet(object.permission) ? String(object.permission) : "",
       subject: isSet(object.subject) ? Subject.fromJSON(object.subject) : undefined,
+      contextualTuples: Array.isArray(object?.contextual_tuples)
+        ? object.contextual_tuples.map((e: any) => Tuple.fromJSON(e))
+        : [],
     };
   },
 
@@ -813,6 +871,11 @@ export const PermissionLookupEntityRequest = {
     message.entityType !== undefined && (obj.entity_type = message.entityType);
     message.permission !== undefined && (obj.permission = message.permission);
     message.subject !== undefined && (obj.subject = message.subject ? Subject.toJSON(message.subject) : undefined);
+    if (message.contextualTuples) {
+      obj.contextual_tuples = message.contextualTuples.map((e) => e ? Tuple.toJSON(e) : undefined);
+    } else {
+      obj.contextual_tuples = [];
+    }
     return obj;
   },
 
@@ -827,6 +890,7 @@ export const PermissionLookupEntityRequest = {
     message.subject = (object.subject !== undefined && object.subject !== null)
       ? Subject.fromPartial(object.subject)
       : undefined;
+    message.contextualTuples = object.contextualTuples?.map((e) => Tuple.fromPartial(e)) || [];
     return message;
   },
 };
@@ -997,7 +1061,7 @@ export const PermissionLookupEntityStreamResponse = {
 };
 
 function createBasePermissionEntityFilterRequest(): PermissionEntityFilterRequest {
-  return { tenantId: "", metadata: undefined, entityReference: undefined, subject: undefined };
+  return { tenantId: "", metadata: undefined, entityReference: undefined, subject: undefined, contextualTuples: [] };
 }
 
 export const PermissionEntityFilterRequest = {
@@ -1013,6 +1077,9 @@ export const PermissionEntityFilterRequest = {
     }
     if (message.subject !== undefined) {
       Subject.encode(message.subject, writer.uint32(34).fork()).ldelim();
+    }
+    for (const v of message.contextualTuples) {
+      Tuple.encode(v!, writer.uint32(42).fork()).ldelim();
     }
     return writer;
   },
@@ -1036,6 +1103,9 @@ export const PermissionEntityFilterRequest = {
         case 4:
           message.subject = Subject.decode(reader, reader.uint32());
           break;
+        case 5:
+          message.contextualTuples.push(Tuple.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1050,6 +1120,9 @@ export const PermissionEntityFilterRequest = {
       metadata: isSet(object.metadata) ? PermissionEntityFilterRequestMetadata.fromJSON(object.metadata) : undefined,
       entityReference: isSet(object.entity_reference) ? RelationReference.fromJSON(object.entity_reference) : undefined,
       subject: isSet(object.subject) ? Subject.fromJSON(object.subject) : undefined,
+      contextualTuples: Array.isArray(object?.contextual_tuples)
+        ? object.contextual_tuples.map((e: any) => Tuple.fromJSON(e))
+        : [],
     };
   },
 
@@ -1061,6 +1134,11 @@ export const PermissionEntityFilterRequest = {
     message.entityReference !== undefined &&
       (obj.entity_reference = message.entityReference ? RelationReference.toJSON(message.entityReference) : undefined);
     message.subject !== undefined && (obj.subject = message.subject ? Subject.toJSON(message.subject) : undefined);
+    if (message.contextualTuples) {
+      obj.contextual_tuples = message.contextualTuples.map((e) => e ? Tuple.toJSON(e) : undefined);
+    } else {
+      obj.contextual_tuples = [];
+    }
     return obj;
   },
 
@@ -1076,6 +1154,7 @@ export const PermissionEntityFilterRequest = {
     message.subject = (object.subject !== undefined && object.subject !== null)
       ? Subject.fromPartial(object.subject)
       : undefined;
+    message.contextualTuples = object.contextualTuples?.map((e) => Tuple.fromPartial(e)) || [];
     return message;
   },
 };
@@ -1148,7 +1227,14 @@ export const PermissionEntityFilterRequestMetadata = {
 };
 
 function createBasePermissionLookupSubjectRequest(): PermissionLookupSubjectRequest {
-  return { tenantId: "", metadata: undefined, entity: undefined, permission: "", subjectReference: undefined };
+  return {
+    tenantId: "",
+    metadata: undefined,
+    entity: undefined,
+    permission: "",
+    subjectReference: undefined,
+    contextualTuples: [],
+  };
 }
 
 export const PermissionLookupSubjectRequest = {
@@ -1167,6 +1253,9 @@ export const PermissionLookupSubjectRequest = {
     }
     if (message.subjectReference !== undefined) {
       RelationReference.encode(message.subjectReference, writer.uint32(42).fork()).ldelim();
+    }
+    for (const v of message.contextualTuples) {
+      Tuple.encode(v!, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -1193,6 +1282,9 @@ export const PermissionLookupSubjectRequest = {
         case 5:
           message.subjectReference = RelationReference.decode(reader, reader.uint32());
           break;
+        case 6:
+          message.contextualTuples.push(Tuple.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1210,6 +1302,9 @@ export const PermissionLookupSubjectRequest = {
       subjectReference: isSet(object.subject_reference)
         ? RelationReference.fromJSON(object.subject_reference)
         : undefined,
+      contextualTuples: Array.isArray(object?.contextual_tuples)
+        ? object.contextual_tuples.map((e: any) => Tuple.fromJSON(e))
+        : [],
     };
   },
 
@@ -1224,6 +1319,11 @@ export const PermissionLookupSubjectRequest = {
       (obj.subject_reference = message.subjectReference
         ? RelationReference.toJSON(message.subjectReference)
         : undefined);
+    if (message.contextualTuples) {
+      obj.contextual_tuples = message.contextualTuples.map((e) => e ? Tuple.toJSON(e) : undefined);
+    } else {
+      obj.contextual_tuples = [];
+    }
     return obj;
   },
 
@@ -1240,6 +1340,7 @@ export const PermissionLookupSubjectRequest = {
     message.subjectReference = (object.subjectReference !== undefined && object.subjectReference !== null)
       ? RelationReference.fromPartial(object.subjectReference)
       : undefined;
+    message.contextualTuples = object.contextualTuples?.map((e) => Tuple.fromPartial(e)) || [];
     return message;
   },
 };
