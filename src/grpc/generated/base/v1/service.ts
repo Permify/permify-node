@@ -3,6 +3,9 @@ import Long from "long";
 import type { CallContext, CallOptions } from "nice-grpc-common";
 import _m0 from "protobufjs/minimal";
 import {
+  CheckResult,
+  checkResultFromJSON,
+  checkResultToJSON,
   Entity,
   Expand,
   RelationReference,
@@ -38,48 +41,8 @@ export interface PermissionCheckRequestMetadata {
 
 /** PermissionCheckResponse */
 export interface PermissionCheckResponse {
-  can: PermissionCheckResponse_Result;
+  can: CheckResult;
   metadata: PermissionCheckResponseMetadata | undefined;
-}
-
-/** Result */
-export enum PermissionCheckResponse_Result {
-  RESULT_UNKNOWN = 0,
-  RESULT_ALLOWED = 1,
-  RESULT_DENIED = 2,
-  UNRECOGNIZED = -1,
-}
-
-export function permissionCheckResponse_ResultFromJSON(object: any): PermissionCheckResponse_Result {
-  switch (object) {
-    case 0:
-    case "RESULT_UNKNOWN":
-      return PermissionCheckResponse_Result.RESULT_UNKNOWN;
-    case 1:
-    case "RESULT_ALLOWED":
-      return PermissionCheckResponse_Result.RESULT_ALLOWED;
-    case 2:
-    case "RESULT_DENIED":
-      return PermissionCheckResponse_Result.RESULT_DENIED;
-    case -1:
-    case "UNRECOGNIZED":
-    default:
-      return PermissionCheckResponse_Result.UNRECOGNIZED;
-  }
-}
-
-export function permissionCheckResponse_ResultToJSON(object: PermissionCheckResponse_Result): string {
-  switch (object) {
-    case PermissionCheckResponse_Result.RESULT_UNKNOWN:
-      return "RESULT_UNKNOWN";
-    case PermissionCheckResponse_Result.RESULT_ALLOWED:
-      return "RESULT_ALLOWED";
-    case PermissionCheckResponse_Result.RESULT_DENIED:
-      return "RESULT_DENIED";
-    case PermissionCheckResponse_Result.UNRECOGNIZED:
-    default:
-      return "UNRECOGNIZED";
-  }
 }
 
 /** CheckResponseMetadata */
@@ -172,6 +135,32 @@ export interface PermissionLookupSubjectRequestMetadata {
 /** PermissionLookupSubjectResponse */
 export interface PermissionLookupSubjectResponse {
   subjectIds: string[];
+}
+
+export interface PermissionSubjectPermissionRequest {
+  tenantId: string;
+  metadata: PermissionSubjectPermissionRequestMetadata | undefined;
+  entity: Entity | undefined;
+  subject: Subject | undefined;
+  contextualTuples: Tuple[];
+}
+
+/** PermissionCheckRequestMetadata */
+export interface PermissionSubjectPermissionRequestMetadata {
+  schemaVersion: string;
+  snapToken: string;
+  onlyPermission: boolean;
+  depth: number;
+}
+
+/** SubjectPermissionResponse */
+export interface PermissionSubjectPermissionResponse {
+  results: { [key: string]: CheckResult };
+}
+
+export interface PermissionSubjectPermissionResponse_ResultsEntry {
+  key: string;
+  value: CheckResult;
 }
 
 /** WatchRequest */
@@ -512,14 +501,14 @@ export const PermissionCheckResponse = {
 
   fromJSON(object: any): PermissionCheckResponse {
     return {
-      can: isSet(object.can) ? permissionCheckResponse_ResultFromJSON(object.can) : 0,
+      can: isSet(object.can) ? checkResultFromJSON(object.can) : 0,
       metadata: isSet(object.metadata) ? PermissionCheckResponseMetadata.fromJSON(object.metadata) : undefined,
     };
   },
 
   toJSON(message: PermissionCheckResponse): unknown {
     const obj: any = {};
-    message.can !== undefined && (obj.can = permissionCheckResponse_ResultToJSON(message.can));
+    message.can !== undefined && (obj.can = checkResultToJSON(message.can));
     message.metadata !== undefined &&
       (obj.metadata = message.metadata ? PermissionCheckResponseMetadata.toJSON(message.metadata) : undefined);
     return obj;
@@ -1450,6 +1439,320 @@ export const PermissionLookupSubjectResponse = {
   fromPartial(object: DeepPartial<PermissionLookupSubjectResponse>): PermissionLookupSubjectResponse {
     const message = createBasePermissionLookupSubjectResponse();
     message.subjectIds = object.subjectIds?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBasePermissionSubjectPermissionRequest(): PermissionSubjectPermissionRequest {
+  return { tenantId: "", metadata: undefined, entity: undefined, subject: undefined, contextualTuples: [] };
+}
+
+export const PermissionSubjectPermissionRequest = {
+  encode(message: PermissionSubjectPermissionRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
+    if (message.metadata !== undefined) {
+      PermissionSubjectPermissionRequestMetadata.encode(message.metadata, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.entity !== undefined) {
+      Entity.encode(message.entity, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.subject !== undefined) {
+      Subject.encode(message.subject, writer.uint32(34).fork()).ldelim();
+    }
+    for (const v of message.contextualTuples) {
+      Tuple.encode(v!, writer.uint32(42).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PermissionSubjectPermissionRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePermissionSubjectPermissionRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.tenantId = reader.string();
+          break;
+        case 2:
+          message.metadata = PermissionSubjectPermissionRequestMetadata.decode(reader, reader.uint32());
+          break;
+        case 3:
+          message.entity = Entity.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.subject = Subject.decode(reader, reader.uint32());
+          break;
+        case 5:
+          message.contextualTuples.push(Tuple.decode(reader, reader.uint32()));
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PermissionSubjectPermissionRequest {
+    return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
+      metadata: isSet(object.metadata)
+        ? PermissionSubjectPermissionRequestMetadata.fromJSON(object.metadata)
+        : undefined,
+      entity: isSet(object.entity) ? Entity.fromJSON(object.entity) : undefined,
+      subject: isSet(object.subject) ? Subject.fromJSON(object.subject) : undefined,
+      contextualTuples: Array.isArray(object?.contextual_tuples)
+        ? object.contextual_tuples.map((e: any) => Tuple.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: PermissionSubjectPermissionRequest): unknown {
+    const obj: any = {};
+    message.tenantId !== undefined && (obj.tenant_id = message.tenantId);
+    message.metadata !== undefined &&
+      (obj.metadata = message.metadata
+        ? PermissionSubjectPermissionRequestMetadata.toJSON(message.metadata)
+        : undefined);
+    message.entity !== undefined && (obj.entity = message.entity ? Entity.toJSON(message.entity) : undefined);
+    message.subject !== undefined && (obj.subject = message.subject ? Subject.toJSON(message.subject) : undefined);
+    if (message.contextualTuples) {
+      obj.contextual_tuples = message.contextualTuples.map((e) => e ? Tuple.toJSON(e) : undefined);
+    } else {
+      obj.contextual_tuples = [];
+    }
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<PermissionSubjectPermissionRequest>): PermissionSubjectPermissionRequest {
+    const message = createBasePermissionSubjectPermissionRequest();
+    message.tenantId = object.tenantId ?? "";
+    message.metadata = (object.metadata !== undefined && object.metadata !== null)
+      ? PermissionSubjectPermissionRequestMetadata.fromPartial(object.metadata)
+      : undefined;
+    message.entity = (object.entity !== undefined && object.entity !== null)
+      ? Entity.fromPartial(object.entity)
+      : undefined;
+    message.subject = (object.subject !== undefined && object.subject !== null)
+      ? Subject.fromPartial(object.subject)
+      : undefined;
+    message.contextualTuples = object.contextualTuples?.map((e) => Tuple.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBasePermissionSubjectPermissionRequestMetadata(): PermissionSubjectPermissionRequestMetadata {
+  return { schemaVersion: "", snapToken: "", onlyPermission: false, depth: 0 };
+}
+
+export const PermissionSubjectPermissionRequestMetadata = {
+  encode(message: PermissionSubjectPermissionRequestMetadata, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.schemaVersion !== "") {
+      writer.uint32(10).string(message.schemaVersion);
+    }
+    if (message.snapToken !== "") {
+      writer.uint32(18).string(message.snapToken);
+    }
+    if (message.onlyPermission === true) {
+      writer.uint32(24).bool(message.onlyPermission);
+    }
+    if (message.depth !== 0) {
+      writer.uint32(32).int32(message.depth);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PermissionSubjectPermissionRequestMetadata {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePermissionSubjectPermissionRequestMetadata();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.schemaVersion = reader.string();
+          break;
+        case 2:
+          message.snapToken = reader.string();
+          break;
+        case 3:
+          message.onlyPermission = reader.bool();
+          break;
+        case 4:
+          message.depth = reader.int32();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PermissionSubjectPermissionRequestMetadata {
+    return {
+      schemaVersion: isSet(object.schema_version) ? String(object.schema_version) : "",
+      snapToken: isSet(object.snap_token) ? String(object.snap_token) : "",
+      onlyPermission: isSet(object.only_permission) ? Boolean(object.only_permission) : false,
+      depth: isSet(object.depth) ? Number(object.depth) : 0,
+    };
+  },
+
+  toJSON(message: PermissionSubjectPermissionRequestMetadata): unknown {
+    const obj: any = {};
+    message.schemaVersion !== undefined && (obj.schema_version = message.schemaVersion);
+    message.snapToken !== undefined && (obj.snap_token = message.snapToken);
+    message.onlyPermission !== undefined && (obj.only_permission = message.onlyPermission);
+    message.depth !== undefined && (obj.depth = Math.round(message.depth));
+    return obj;
+  },
+
+  fromPartial(
+    object: DeepPartial<PermissionSubjectPermissionRequestMetadata>,
+  ): PermissionSubjectPermissionRequestMetadata {
+    const message = createBasePermissionSubjectPermissionRequestMetadata();
+    message.schemaVersion = object.schemaVersion ?? "";
+    message.snapToken = object.snapToken ?? "";
+    message.onlyPermission = object.onlyPermission ?? false;
+    message.depth = object.depth ?? 0;
+    return message;
+  },
+};
+
+function createBasePermissionSubjectPermissionResponse(): PermissionSubjectPermissionResponse {
+  return { results: {} };
+}
+
+export const PermissionSubjectPermissionResponse = {
+  encode(message: PermissionSubjectPermissionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    Object.entries(message.results).forEach(([key, value]) => {
+      PermissionSubjectPermissionResponse_ResultsEntry.encode({ key: key as any, value }, writer.uint32(10).fork())
+        .ldelim();
+    });
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PermissionSubjectPermissionResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePermissionSubjectPermissionResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          const entry1 = PermissionSubjectPermissionResponse_ResultsEntry.decode(reader, reader.uint32());
+          if (entry1.value !== undefined) {
+            message.results[entry1.key] = entry1.value;
+          }
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PermissionSubjectPermissionResponse {
+    return {
+      results: isObject(object.results)
+        ? Object.entries(object.results).reduce<{ [key: string]: CheckResult }>((acc, [key, value]) => {
+          acc[key] = checkResultFromJSON(value);
+          return acc;
+        }, {})
+        : {},
+    };
+  },
+
+  toJSON(message: PermissionSubjectPermissionResponse): unknown {
+    const obj: any = {};
+    obj.results = {};
+    if (message.results) {
+      Object.entries(message.results).forEach(([k, v]) => {
+        obj.results[k] = checkResultToJSON(v);
+      });
+    }
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<PermissionSubjectPermissionResponse>): PermissionSubjectPermissionResponse {
+    const message = createBasePermissionSubjectPermissionResponse();
+    message.results = Object.entries(object.results ?? {}).reduce<{ [key: string]: CheckResult }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = value as CheckResult;
+        }
+        return acc;
+      },
+      {},
+    );
+    return message;
+  },
+};
+
+function createBasePermissionSubjectPermissionResponse_ResultsEntry(): PermissionSubjectPermissionResponse_ResultsEntry {
+  return { key: "", value: 0 };
+}
+
+export const PermissionSubjectPermissionResponse_ResultsEntry = {
+  encode(
+    message: PermissionSubjectPermissionResponse_ResultsEntry,
+    writer: _m0.Writer = _m0.Writer.create(),
+  ): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== 0) {
+      writer.uint32(16).int32(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PermissionSubjectPermissionResponse_ResultsEntry {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePermissionSubjectPermissionResponse_ResultsEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.key = reader.string();
+          break;
+        case 2:
+          message.value = reader.int32() as any;
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PermissionSubjectPermissionResponse_ResultsEntry {
+    return {
+      key: isSet(object.key) ? String(object.key) : "",
+      value: isSet(object.value) ? checkResultFromJSON(object.value) : 0,
+    };
+  },
+
+  toJSON(message: PermissionSubjectPermissionResponse_ResultsEntry): unknown {
+    const obj: any = {};
+    message.key !== undefined && (obj.key = message.key);
+    message.value !== undefined && (obj.value = checkResultToJSON(message.value));
+    return obj;
+  },
+
+  fromPartial(
+    object: DeepPartial<PermissionSubjectPermissionResponse_ResultsEntry>,
+  ): PermissionSubjectPermissionResponse_ResultsEntry {
+    const message = createBasePermissionSubjectPermissionResponse_ResultsEntry();
+    message.key = object.key ?? "";
+    message.value = object.value ?? 0;
     return message;
   },
 };
@@ -2664,6 +2967,14 @@ export const PermissionDefinition = {
       responseStream: false,
       options: {},
     },
+    subjectPermission: {
+      name: "SubjectPermission",
+      requestType: PermissionSubjectPermissionRequest,
+      requestStream: false,
+      responseType: PermissionSubjectPermissionResponse,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
@@ -2688,6 +2999,10 @@ export interface PermissionServiceImplementation<CallContextExt = {}> {
     request: PermissionLookupSubjectRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<PermissionLookupSubjectResponse>>;
+  subjectPermission(
+    request: PermissionSubjectPermissionRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<PermissionSubjectPermissionResponse>>;
 }
 
 export interface PermissionClient<CallOptionsExt = {}> {
@@ -2711,6 +3026,10 @@ export interface PermissionClient<CallOptionsExt = {}> {
     request: DeepPartial<PermissionLookupSubjectRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<PermissionLookupSubjectResponse>;
+  subjectPermission(
+    request: DeepPartial<PermissionSubjectPermissionRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<PermissionSubjectPermissionResponse>;
 }
 
 /** Watch */
@@ -2907,6 +3226,10 @@ export type DeepPartial<T> = T extends Builtin ? T
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;
   _m0.configure();
+}
+
+function isObject(value: any): boolean {
+  return typeof value === "object" && value !== null;
 }
 
 function isSet(value: any): boolean {

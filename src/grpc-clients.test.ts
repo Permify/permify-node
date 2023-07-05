@@ -1,8 +1,8 @@
 import {newClient} from "./grpc";
 import {
-    PermissionCheckResponse_Result,
     PermissionLookupEntityStreamResponse
 } from "./grpc/generated/base/v1/service";
+import {CheckResult} from "./grpc/generated/base/v1/base";
 
 describe("clients test", () => {
 
@@ -41,7 +41,7 @@ describe("clients test", () => {
                     id: "3"
                 }
             }).then((response) => {
-                expect(response.can).toBe(PermissionCheckResponse_Result.RESULT_DENIED)
+                expect(response.can).toBe(CheckResult.RESULT_DENIED)
                 done();
             })
         })

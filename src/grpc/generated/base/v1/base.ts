@@ -5,6 +5,46 @@ import { Timestamp } from "../../google/protobuf/timestamp";
 
 export const protobufPackage = "base.v1";
 
+/** CheckResult */
+export enum CheckResult {
+  RESULT_UNKNOWN = 0,
+  RESULT_ALLOWED = 1,
+  RESULT_DENIED = 2,
+  UNRECOGNIZED = -1,
+}
+
+export function checkResultFromJSON(object: any): CheckResult {
+  switch (object) {
+    case 0:
+    case "RESULT_UNKNOWN":
+      return CheckResult.RESULT_UNKNOWN;
+    case 1:
+    case "RESULT_ALLOWED":
+      return CheckResult.RESULT_ALLOWED;
+    case 2:
+    case "RESULT_DENIED":
+      return CheckResult.RESULT_DENIED;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return CheckResult.UNRECOGNIZED;
+  }
+}
+
+export function checkResultToJSON(object: CheckResult): string {
+  switch (object) {
+    case CheckResult.RESULT_UNKNOWN:
+      return "RESULT_UNKNOWN";
+    case CheckResult.RESULT_ALLOWED:
+      return "RESULT_ALLOWED";
+    case CheckResult.RESULT_DENIED:
+      return "RESULT_DENIED";
+    case CheckResult.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
 /** Child */
 export interface Child {
   type?: { $case: "leaf"; leaf: Leaf } | { $case: "rewrite"; rewrite: Rewrite };
