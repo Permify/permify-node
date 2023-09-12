@@ -1069,9 +1069,9 @@ grapheme-splitter@^1.0.4:
   integrity sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==
 
 grpc-tools@^1.12.3:
-  version "1.12.3"
-  resolved "https://registry.yarnpkg.com/grpc-tools/-/grpc-tools-1.12.3.tgz#bedbb880e564a52b192d693300280ed7ab45e61d"
-  integrity sha512-KJgk65dbGqkMuj0xiuT5uk45GcqrFfWTSqpk6Ktd0Ds2cEe9QtPQG/uWCGk185ShXCdgYFLRwfh+FyjQ3nlBNw==
+  version "1.12.4"
+  resolved "https://registry.yarnpkg.com/grpc-tools/-/grpc-tools-1.12.4.tgz#a044c9e8157941033ea7a5f144c2dc9dc4501de4"
+  integrity sha512-5+mLAJJma3BjnW/KQp6JBjUMgvu7Mu3dBvBPd1dcbNIb+qiR0817zDpgPjS7gRb+l/8EVNIa3cB02xI9JLToKg==
   dependencies:
     "@mapbox/node-pre-gyp" "^1.0.5"
 
