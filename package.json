@@ -23,7 +23,7 @@
     "grpc"
   ],
   "author": "permify",
-  "license": "AGPL-3.0",
+  "license": "Apache-2.0",
   "dependencies": {
     "@grpc/grpc-js": "^1.8.0",
     "@protobuf-ts/plugin": "^2.8.2",
