@@ -3,7 +3,7 @@ import {ClientMiddleware, createChannel, createClientFactory, ChannelCredentials
 import {
     PermissionDefinition,
     SchemaDefinition,
-    RelationshipDefinition,
+    DataDefinition,
     TenancyDefinition,
     WatchDefinition
 } from './generated/base/v1/service';
@@ -33,7 +33,7 @@ export function newClient(conf: Config, ...interceptors: ClientMiddleware[]) {
     return {
         permission: factory.create(PermissionDefinition, channel),
         schema: factory.create(SchemaDefinition, channel),
-        relationship: factory.create(RelationshipDefinition, channel),
+        data: factory.create(DataDefinition, channel),
         tenancy: factory.create(TenancyDefinition, channel),
         watch: factory.create(WatchDefinition, channel)
     };

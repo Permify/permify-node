@@ -33,6 +33,10 @@ export enum ErrorCode {
   ERROR_CODE_INVALID_KEY = 2022,
   ERROR_CODE_ENTITY_TYPE_REQUIRED = 2023,
   ERROR_CODE_NO_ENTITY_REFERENCES_FOUND_IN_SCHEMA = 2024,
+  ERROR_CODE_INVALID_ARGUMENT = 2025,
+  ERROR_CODE_INVALID_RULE_REFERENCE = 2026,
+  ERROR_CODE_NOT_SUPPORTED_WALK = 2027,
+  ERROR_CODE_MISSING_ARGUMENT = 2028,
   /** ERROR_CODE_NOT_FOUND - not found */
   ERROR_CODE_NOT_FOUND = 4000,
   ERROR_CODE_ENTITY_TYPE_NOT_FOUND = 4001,
@@ -44,6 +48,8 @@ export enum ErrorCode {
   ERROR_CODE_RELATION_DEFINITION_NOT_FOUND = 4007,
   ERROR_CODE_RECORD_NOT_FOUND = 4008,
   ERROR_CODE_TENANT_NOT_FOUND = 4009,
+  ERROR_CODE_ATTRIBUTE_DEFINITION_NOT_FOUND = 4010,
+  ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH = 4011,
   /** ERROR_CODE_INTERNAL - internal */
   ERROR_CODE_INTERNAL = 5000,
   ERROR_CODE_CANCELLED = 5001,
@@ -140,6 +146,18 @@ export function errorCodeFromJSON(object: any): ErrorCode {
     case 2024:
     case "ERROR_CODE_NO_ENTITY_REFERENCES_FOUND_IN_SCHEMA":
       return ErrorCode.ERROR_CODE_NO_ENTITY_REFERENCES_FOUND_IN_SCHEMA;
+    case 2025:
+    case "ERROR_CODE_INVALID_ARGUMENT":
+      return ErrorCode.ERROR_CODE_INVALID_ARGUMENT;
+    case 2026:
+    case "ERROR_CODE_INVALID_RULE_REFERENCE":
+      return ErrorCode.ERROR_CODE_INVALID_RULE_REFERENCE;
+    case 2027:
+    case "ERROR_CODE_NOT_SUPPORTED_WALK":
+      return ErrorCode.ERROR_CODE_NOT_SUPPORTED_WALK;
+    case 2028:
+    case "ERROR_CODE_MISSING_ARGUMENT":
+      return ErrorCode.ERROR_CODE_MISSING_ARGUMENT;
     case 4000:
     case "ERROR_CODE_NOT_FOUND":
       return ErrorCode.ERROR_CODE_NOT_FOUND;
@@ -170,6 +188,12 @@ export function errorCodeFromJSON(object: any): ErrorCode {
     case 4009:
     case "ERROR_CODE_TENANT_NOT_FOUND":
       return ErrorCode.ERROR_CODE_TENANT_NOT_FOUND;
+    case 4010:
+    case "ERROR_CODE_ATTRIBUTE_DEFINITION_NOT_FOUND":
+      return ErrorCode.ERROR_CODE_ATTRIBUTE_DEFINITION_NOT_FOUND;
+    case 4011:
+    case "ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH":
+      return ErrorCode.ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH;
     case 5000:
     case "ERROR_CODE_INTERNAL":
       return ErrorCode.ERROR_CODE_INTERNAL;
@@ -267,6 +291,14 @@ export function errorCodeToJSON(object: ErrorCode): string {
       return "ERROR_CODE_ENTITY_TYPE_REQUIRED";
     case ErrorCode.ERROR_CODE_NO_ENTITY_REFERENCES_FOUND_IN_SCHEMA:
       return "ERROR_CODE_NO_ENTITY_REFERENCES_FOUND_IN_SCHEMA";
+    case ErrorCode.ERROR_CODE_INVALID_ARGUMENT:
+      return "ERROR_CODE_INVALID_ARGUMENT";
+    case ErrorCode.ERROR_CODE_INVALID_RULE_REFERENCE:
+      return "ERROR_CODE_INVALID_RULE_REFERENCE";
+    case ErrorCode.ERROR_CODE_NOT_SUPPORTED_WALK:
+      return "ERROR_CODE_NOT_SUPPORTED_WALK";
+    case ErrorCode.ERROR_CODE_MISSING_ARGUMENT:
+      return "ERROR_CODE_MISSING_ARGUMENT";
     case ErrorCode.ERROR_CODE_NOT_FOUND:
       return "ERROR_CODE_NOT_FOUND";
     case ErrorCode.ERROR_CODE_ENTITY_TYPE_NOT_FOUND:
@@ -287,6 +319,10 @@ export function errorCodeToJSON(object: ErrorCode): string {
       return "ERROR_CODE_RECORD_NOT_FOUND";
     case ErrorCode.ERROR_CODE_TENANT_NOT_FOUND:
       return "ERROR_CODE_TENANT_NOT_FOUND";
+    case ErrorCode.ERROR_CODE_ATTRIBUTE_DEFINITION_NOT_FOUND:
+      return "ERROR_CODE_ATTRIBUTE_DEFINITION_NOT_FOUND";
+    case ErrorCode.ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH:
+      return "ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH";
     case ErrorCode.ERROR_CODE_INTERNAL:
       return "ERROR_CODE_INTERNAL";
     case ErrorCode.ERROR_CODE_CANCELLED:
@@ -339,22 +375,31 @@ export const ErrorResponse = {
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): ErrorResponse {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseErrorResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          if (tag !== 8) {
+            break;
+          }
+
           message.code = reader.int32() as any;
-          break;
+          continue;
         case 2:
+          if (tag !== 18) {
+            break;
+          }
+
           message.message = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
@@ -368,11 +413,18 @@ export const ErrorResponse = {
 
   toJSON(message: ErrorResponse): unknown {
     const obj: any = {};
-    message.code !== undefined && (obj.code = errorCodeToJSON(message.code));
-    message.message !== undefined && (obj.message = message.message);
+    if (message.code !== 0) {
+      obj.code = errorCodeToJSON(message.code);
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
     return obj;
   },
 
+  create(base?: DeepPartial<ErrorResponse>): ErrorResponse {
+    return ErrorResponse.fromPartial(base ?? {});
+  },
   fromPartial(object: DeepPartial<ErrorResponse>): ErrorResponse {
     const message = createBaseErrorResponse();
     message.code = object.code ?? 0;

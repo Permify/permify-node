@@ -26,16 +26,17 @@ export const Empty = {
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): Empty {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseEmpty();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        default:
-          reader.skipType(tag & 7);
-          break;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
@@ -49,6 +50,9 @@ export const Empty = {
     return obj;
   },
 
+  create(base?: DeepPartial<Empty>): Empty {
+    return Empty.fromPartial(base ?? {});
+  },
   fromPartial(_: DeepPartial<Empty>): Empty {
     const message = createBaseEmpty();
     return message;

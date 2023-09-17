@@ -73,7 +73,8 @@ export interface Value {
     | { $case: "stringValue"; stringValue: string }
     | { $case: "boolValue"; boolValue: boolean }
     | { $case: "structValue"; structValue: { [key: string]: any } | undefined }
-    | { $case: "listValue"; listValue: Array<any> | undefined };
+    | { $case: "listValue"; listValue: Array<any> | undefined }
+    | undefined;
 }
 
 /**
@@ -101,22 +102,27 @@ export const Struct = {
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): Struct {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseStruct();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          if (tag !== 10) {
+            break;
+          }
+
           const entry1 = Struct_FieldsEntry.decode(reader, reader.uint32());
           if (entry1.value !== undefined) {
             message.fields[entry1.key] = entry1.value;
           }
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
@@ -134,15 +140,21 @@ export const Struct = {
 
   toJSON(message: Struct): unknown {
     const obj: any = {};
-    obj.fields = {};
     if (message.fields) {
-      Object.entries(message.fields).forEach(([k, v]) => {
-        obj.fields[k] = v;
-      });
+      const entries = Object.entries(message.fields);
+      if (entries.length > 0) {
+        obj.fields = {};
+        entries.forEach(([k, v]) => {
+          obj.fields[k] = v;
+        });
+      }
     }
     return obj;
   },
 
+  create(base?: DeepPartial<Struct>): Struct {
+    return Struct.fromPartial(base ?? {});
+  },
   fromPartial(object: DeepPartial<Struct>): Struct {
     const message = createBaseStruct();
     message.fields = Object.entries(object.fields ?? {}).reduce<{ [key: string]: any | undefined }>(
@@ -169,9 +181,11 @@ export const Struct = {
 
   unwrap(message: Struct): { [key: string]: any } {
     const object: { [key: string]: any } = {};
-    Object.keys(message.fields).forEach((key) => {
-      object[key] = message.fields[key];
-    });
+    if (message.fields) {
+      Object.keys(message.fields).forEach((key) => {
+        object[key] = message.fields[key];
+      });
+    }
     return object;
   },
 };
@@ -192,22 +206,31 @@ export const Struct_FieldsEntry = {
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): Struct_FieldsEntry {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseStruct_FieldsEntry();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          if (tag !== 10) {
+            break;
+          }
+
           message.key = reader.string();
-          break;
+          continue;
         case 2:
+          if (tag !== 18) {
+            break;
+          }
+
           message.value = Value.unwrap(Value.decode(reader, reader.uint32()));
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
@@ -218,11 +241,18 @@ export const Struct_FieldsEntry = {
 
   toJSON(message: Struct_FieldsEntry): unknown {
     const obj: any = {};
-    message.key !== undefined && (obj.key = message.key);
-    message.value !== undefined && (obj.value = message.value);
+    if (message.key !== "") {
+      obj.key = message.key;
+    }
+    if (message.value !== undefined) {
+      obj.value = message.value;
+    }
     return obj;
   },
 
+  create(base?: DeepPartial<Struct_FieldsEntry>): Struct_FieldsEntry {
+    return Struct_FieldsEntry.fromPartial(base ?? {});
+  },
   fromPartial(object: DeepPartial<Struct_FieldsEntry>): Struct_FieldsEntry {
     const message = createBaseStruct_FieldsEntry();
     message.key = object.key ?? "";
@@ -237,56 +267,83 @@ function createBaseValue(): Value {
 
 export const Value = {
   encode(message: Value, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.kind?.$case === "nullValue") {
-      writer.uint32(8).int32(message.kind.nullValue);
-    }
-    if (message.kind?.$case === "numberValue") {
-      writer.uint32(17).double(message.kind.numberValue);
-    }
-    if (message.kind?.$case === "stringValue") {
-      writer.uint32(26).string(message.kind.stringValue);
-    }
-    if (message.kind?.$case === "boolValue") {
-      writer.uint32(32).bool(message.kind.boolValue);
-    }
-    if (message.kind?.$case === "structValue") {
-      Struct.encode(Struct.wrap(message.kind.structValue), writer.uint32(42).fork()).ldelim();
-    }
-    if (message.kind?.$case === "listValue") {
-      ListValue.encode(ListValue.wrap(message.kind.listValue), writer.uint32(50).fork()).ldelim();
+    switch (message.kind?.$case) {
+      case "nullValue":
+        writer.uint32(8).int32(message.kind.nullValue);
+        break;
+      case "numberValue":
+        writer.uint32(17).double(message.kind.numberValue);
+        break;
+      case "stringValue":
+        writer.uint32(26).string(message.kind.stringValue);
+        break;
+      case "boolValue":
+        writer.uint32(32).bool(message.kind.boolValue);
+        break;
+      case "structValue":
+        Struct.encode(Struct.wrap(message.kind.structValue), writer.uint32(42).fork()).ldelim();
+        break;
+      case "listValue":
+        ListValue.encode(ListValue.wrap(message.kind.listValue), writer.uint32(50).fork()).ldelim();
+        break;
     }
     return writer;
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): Value {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseValue();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          if (tag !== 8) {
+            break;
+          }
+
           message.kind = { $case: "nullValue", nullValue: reader.int32() as any };
-          break;
+          continue;
         case 2:
+          if (tag !== 17) {
+            break;
+          }
+
           message.kind = { $case: "numberValue", numberValue: reader.double() };
-          break;
+          continue;
         case 3:
+          if (tag !== 26) {
+            break;
+          }
+
           message.kind = { $case: "stringValue", stringValue: reader.string() };
-          break;
+          continue;
         case 4:
+          if (tag !== 32) {
+            break;
+          }
+
           message.kind = { $case: "boolValue", boolValue: reader.bool() };
-          break;
+          continue;
         case 5:
+          if (tag !== 42) {
+            break;
+          }
+
           message.kind = { $case: "structValue", structValue: Struct.unwrap(Struct.decode(reader, reader.uint32())) };
-          break;
+          continue;
         case 6:
+          if (tag !== 50) {
+            break;
+          }
+
           message.kind = { $case: "listValue", listValue: ListValue.unwrap(ListValue.decode(reader, reader.uint32())) };
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
@@ -311,16 +368,30 @@ export const Value = {
 
   toJSON(message: Value): unknown {
     const obj: any = {};
-    message.kind?.$case === "nullValue" &&
-      (obj.nullValue = message.kind?.nullValue !== undefined ? nullValueToJSON(message.kind?.nullValue) : undefined);
-    message.kind?.$case === "numberValue" && (obj.numberValue = message.kind?.numberValue);
-    message.kind?.$case === "stringValue" && (obj.stringValue = message.kind?.stringValue);
-    message.kind?.$case === "boolValue" && (obj.boolValue = message.kind?.boolValue);
-    message.kind?.$case === "structValue" && (obj.structValue = message.kind?.structValue);
-    message.kind?.$case === "listValue" && (obj.listValue = message.kind?.listValue);
+    if (message.kind?.$case === "nullValue") {
+      obj.nullValue = nullValueToJSON(message.kind.nullValue);
+    }
+    if (message.kind?.$case === "numberValue") {
+      obj.numberValue = message.kind.numberValue;
+    }
+    if (message.kind?.$case === "stringValue") {
+      obj.stringValue = message.kind.stringValue;
+    }
+    if (message.kind?.$case === "boolValue") {
+      obj.boolValue = message.kind.boolValue;
+    }
+    if (message.kind?.$case === "structValue") {
+      obj.structValue = message.kind.structValue;
+    }
+    if (message.kind?.$case === "listValue") {
+      obj.listValue = message.kind.listValue;
+    }
     return obj;
   },
 
+  create(base?: DeepPartial<Value>): Value {
+    return Value.fromPartial(base ?? {});
+  },
   fromPartial(object: DeepPartial<Value>): Value {
     const message = createBaseValue();
     if (object.kind?.$case === "nullValue" && object.kind?.nullValue !== undefined && object.kind?.nullValue !== null) {
@@ -358,7 +429,6 @@ export const Value = {
 
   wrap(value: any): Value {
     const result = createBaseValue();
-
     if (value === null) {
       result.kind = { $case: "nullValue", nullValue: NullValue.NULL_VALUE };
     } else if (typeof value === "boolean") {
@@ -374,7 +444,6 @@ export const Value = {
     } else if (typeof value !== "undefined") {
       throw new Error("Unsupported any value type: " + typeof value);
     }
-
     return result;
   },
 
@@ -410,19 +479,24 @@ export const ListValue = {
   },
 
   decode(input: _m0.Reader | Uint8Array, length?: number): ListValue {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseListValue();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          if (tag !== 10) {
+            break;
+          }
+
           message.values.push(Value.unwrap(Value.decode(reader, reader.uint32())));
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
@@ -433,30 +507,33 @@ export const ListValue = {
 
   toJSON(message: ListValue): unknown {
     const obj: any = {};
-    if (message.values) {
-      obj.values = message.values.map((e) => e);
-    } else {
-      obj.values = [];
+    if (message.values?.length) {
+      obj.values = message.values;
     }
     return obj;
   },
 
+  create(base?: DeepPartial<ListValue>): ListValue {
+    return ListValue.fromPartial(base ?? {});
+  },
   fromPartial(object: DeepPartial<ListValue>): ListValue {
     const message = createBaseListValue();
     message.values = object.values?.map((e) => e) || [];
     return message;
   },
 
-  wrap(value: Array<any> | undefined): ListValue {
+  wrap(array: Array<any> | undefined): ListValue {
     const result = createBaseListValue();
-
-    result.values = value ?? [];
-
+    result.values = array ?? [];
     return result;
   },
 
   unwrap(message: ListValue): Array<any> {
-    return message.values;
+    if (message?.hasOwnProperty("values") && Array.isArray(message.values)) {
+      return message.values;
+    } else {
+      return message as any;
+    }
   },
 };
 

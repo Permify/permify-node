@@ -41,7 +41,7 @@ describe("clients test", () => {
                     id: "3"
                 }
             }).then((response) => {
-                expect(response.can).toBe(CheckResult.RESULT_DENIED)
+                expect(response.can).toBe(CheckResult.CHECK_RESULT_DENIED)
                 done();
             })
         })
@@ -65,7 +65,7 @@ describe("clients test", () => {
             }
             `
         }).then((swResponse) => {
-            client.relationship.write({
+            client.data.writeRelationships({
                 tenantId: "t1",
                 metadata: {
                     schemaVersion: swResponse.schemaVersion
