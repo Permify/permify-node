@@ -2,7 +2,8 @@ import {newClient} from "./grpc";
 import {
     PermissionLookupEntityStreamResponse
 } from "./grpc/generated/base/v1/service";
-import {CheckResult} from "./grpc/generated/base/v1/base";
+import {BooleanValue, CheckResult} from "./grpc/generated/base/v1/base";
+import {Any} from "./grpc/generated/google/protobuf/any";
 
 describe("clients test", () => {
 
@@ -53,6 +54,13 @@ describe("clients test", () => {
             cert: null
         })
 
+        const booleanValue = BooleanValue.fromJSON({ data: true });
+
+        const anyMessage = Any.fromJSON({
+            typeUrl: 'type.googleapis.com/base.v1.BooleanValue',
+            value: BooleanValue.encode(booleanValue).finish()
+        });
+
         client.schema.write({
             tenantId: "t1",
             schema: `
@@ -61,15 +69,25 @@ describe("clients test", () => {
             entity document {
                relation viewer @user
                
+               attribute public boolean 
+               
                action view = viewer
             }
             `
         }).then((swResponse) => {
-            client.data.writeRelationships({
+            client.data.write({
                 tenantId: "t1",
                 metadata: {
                     schemaVersion: swResponse.schemaVersion
                 },
+                attributes: [{
+                    entity: {
+                        type: "document",
+                        id: "1"
+                    },
+                    attribute: "public",
+                    value: anyMessage,
+                }],
                 tuples: [{
                     entity: {
                         type: "document",
