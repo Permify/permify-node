@@ -68,7 +68,7 @@
   resolved "https://registry.npmjs.org/@eslint/js/-/js-8.49.0.tgz"
   integrity sha512-1S8uAY/MTJqVx0SC4epBq+N2yhuwtNwLbJYNZyhL2pO1ZVKn5HFXav5T41Ryzy9K9V7ZId2JB2oy/W4aCd9/2w==
 
-"@grpc/grpc-js@^1.8.0", "@grpc/grpc-js@^1.8.18":
+"@grpc/grpc-js@^1.8.0", "@grpc/grpc-js@^1.9.5":
   version "1.9.7"
   resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.9.7.tgz#7d0e29bc162287bee2523901c9bc9320d8402397"
   integrity sha512-yMaA/cIsRhGzW3ymCNpdlPcInXcovztlgu/rirThj2b87u3RzWUszliOqZ/pldy7yhmJPS8uwog+kZSTa4A0PQ==
@@ -1498,11 +1498,11 @@ nice-grpc-common@^2.0.0, nice-grpc-common@^2.0.2:
     ts-error "^1.0.6"
 
 nice-grpc@^2.0.1:
-  version "2.1.5"
-  resolved "https://registry.npmjs.org/nice-grpc/-/nice-grpc-2.1.5.tgz"
-  integrity sha512-xqtgW+9VpKD+J3G3sl9+ggR//DmYGrNgjfuEznTU3eL/zRLhn/SwSzl2Elw7TiPknEQ54hDtaOP6VQ8ktv+6fA==
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/nice-grpc/-/nice-grpc-2.1.7.tgz#0ad0495dee85514f0d895e3797cedc8eabd0462f"
+  integrity sha512-pSaZk5Y3PHGAPObOSXTrANgimA6T//szxlcKOnnyttpYwO0gyOpX2WsaFK4fbGJizPVxXjwqrXpPOSHMwM2vlg==
   dependencies:
-    "@grpc/grpc-js" "^1.8.18"
+    "@grpc/grpc-js" "^1.9.5"
     abort-controller-x "^0.4.0"
     nice-grpc-common "^2.0.2"
 
