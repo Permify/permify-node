@@ -4,6 +4,7 @@ import {
     PermissionDefinition,
     SchemaDefinition,
     DataDefinition,
+    BundleDefinition,
     TenancyDefinition,
     WatchDefinition
 } from './generated/base/v1/service';
@@ -34,6 +35,7 @@ export function newClient(conf: Config, ...interceptors: ClientMiddleware[]) {
         permission: factory.create(PermissionDefinition, channel),
         schema: factory.create(SchemaDefinition, channel),
         data: factory.create(DataDefinition, channel),
+        bundle: factory.create(BundleDefinition, channel),
         tenancy: factory.create(TenancyDefinition, channel),
         watch: factory.create(WatchDefinition, channel)
     };

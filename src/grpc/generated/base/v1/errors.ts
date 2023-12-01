@@ -37,6 +37,7 @@ export enum ErrorCode {
   ERROR_CODE_INVALID_RULE_REFERENCE = 2026,
   ERROR_CODE_NOT_SUPPORTED_WALK = 2027,
   ERROR_CODE_MISSING_ARGUMENT = 2028,
+  ERROR_CODE_ALREADY_EXIST = 2029,
   /** ERROR_CODE_NOT_FOUND - not found */
   ERROR_CODE_NOT_FOUND = 4000,
   ERROR_CODE_ENTITY_TYPE_NOT_FOUND = 4001,
@@ -50,6 +51,7 @@ export enum ErrorCode {
   ERROR_CODE_TENANT_NOT_FOUND = 4009,
   ERROR_CODE_ATTRIBUTE_DEFINITION_NOT_FOUND = 4010,
   ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH = 4011,
+  ERROR_CODE_BUNDLE_NOT_FOUND = 4012,
   /** ERROR_CODE_INTERNAL - internal */
   ERROR_CODE_INTERNAL = 5000,
   ERROR_CODE_CANCELLED = 5001,
@@ -158,6 +160,9 @@ export function errorCodeFromJSON(object: any): ErrorCode {
     case 2028:
     case "ERROR_CODE_MISSING_ARGUMENT":
       return ErrorCode.ERROR_CODE_MISSING_ARGUMENT;
+    case 2029:
+    case "ERROR_CODE_ALREADY_EXIST":
+      return ErrorCode.ERROR_CODE_ALREADY_EXIST;
     case 4000:
     case "ERROR_CODE_NOT_FOUND":
       return ErrorCode.ERROR_CODE_NOT_FOUND;
@@ -194,6 +199,9 @@ export function errorCodeFromJSON(object: any): ErrorCode {
     case 4011:
     case "ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH":
       return ErrorCode.ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH;
+    case 4012:
+    case "ERROR_CODE_BUNDLE_NOT_FOUND":
+      return ErrorCode.ERROR_CODE_BUNDLE_NOT_FOUND;
     case 5000:
     case "ERROR_CODE_INTERNAL":
       return ErrorCode.ERROR_CODE_INTERNAL;
@@ -299,6 +307,8 @@ export function errorCodeToJSON(object: ErrorCode): string {
       return "ERROR_CODE_NOT_SUPPORTED_WALK";
     case ErrorCode.ERROR_CODE_MISSING_ARGUMENT:
       return "ERROR_CODE_MISSING_ARGUMENT";
+    case ErrorCode.ERROR_CODE_ALREADY_EXIST:
+      return "ERROR_CODE_ALREADY_EXIST";
     case ErrorCode.ERROR_CODE_NOT_FOUND:
       return "ERROR_CODE_NOT_FOUND";
     case ErrorCode.ERROR_CODE_ENTITY_TYPE_NOT_FOUND:
@@ -323,6 +333,8 @@ export function errorCodeToJSON(object: ErrorCode): string {
       return "ERROR_CODE_ATTRIBUTE_DEFINITION_NOT_FOUND";
     case ErrorCode.ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH:
       return "ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH";
+    case ErrorCode.ERROR_CODE_BUNDLE_NOT_FOUND:
+      return "ERROR_CODE_BUNDLE_NOT_FOUND";
     case ErrorCode.ERROR_CODE_INTERNAL:
       return "ERROR_CODE_INTERNAL";
     case ErrorCode.ERROR_CODE_CANCELLED:

@@ -769,6 +769,52 @@ export interface BooleanArrayValue {
   data: boolean[];
 }
 
+/**
+ * DataBundle is a message representing a bundle of data, which includes a name,
+ * a list of arguments, and a series of operations.
+ */
+export interface DataBundle {
+  /** 'name' is a simple string field representing the name of the DataBundle. */
+  name: string;
+  /**
+   * 'arguments' is a repeated field, which means it can contain multiple strings.
+   * These are used to store a list of arguments related to the DataBundle.
+   */
+  arguments: string[];
+  /**
+   * 'operations' is a repeated field containing multiple Operation messages.
+   * Each Operation represents a specific action or set of actions to be performed.
+   */
+  operations: Operation[];
+}
+
+/**
+ * Operation is a message representing a series of operations that can be performed.
+ * It includes fields for writing and deleting relationships and attributes.
+ */
+export interface Operation {
+  /**
+   * 'relationships_write' is a repeated string field for storing relationship keys
+   * that are to be written or created.
+   */
+  relationshipsWrite: string[];
+  /**
+   * 'relationships_delete' is a repeated string field for storing relationship keys
+   * that are to be deleted or removed.
+   */
+  relationshipsDelete: string[];
+  /**
+   * 'attributes_write' is a repeated string field for storing attribute keys
+   * that are to be written or created.
+   */
+  attributesWrite: string[];
+  /**
+   * 'attributes_delete' is a repeated string field for storing attribute keys
+   * that are to be deleted or removed.
+   */
+  attributesDelete: string[];
+}
+
 function createBaseContext(): Context {
   return { tuples: [], attributes: [], data: undefined };
 }
@@ -5154,6 +5200,207 @@ export const BooleanArrayValue = {
   fromPartial(object: DeepPartial<BooleanArrayValue>): BooleanArrayValue {
     const message = createBaseBooleanArrayValue();
     message.data = object.data?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseDataBundle(): DataBundle {
+  return { name: "", arguments: [], operations: [] };
+}
+
+export const DataBundle = {
+  encode(message: DataBundle, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.name !== "") {
+      writer.uint32(10).string(message.name);
+    }
+    for (const v of message.arguments) {
+      writer.uint32(18).string(v!);
+    }
+    for (const v of message.operations) {
+      Operation.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): DataBundle {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDataBundle();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.arguments.push(reader.string());
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.operations.push(Operation.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): DataBundle {
+    return {
+      name: isSet(object.name) ? String(object.name) : "",
+      arguments: Array.isArray(object?.arguments) ? object.arguments.map((e: any) => String(e)) : [],
+      operations: Array.isArray(object?.operations) ? object.operations.map((e: any) => Operation.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: DataBundle): unknown {
+    const obj: any = {};
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.arguments?.length) {
+      obj.arguments = message.arguments;
+    }
+    if (message.operations?.length) {
+      obj.operations = message.operations.map((e) => Operation.toJSON(e));
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<DataBundle>): DataBundle {
+    return DataBundle.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<DataBundle>): DataBundle {
+    const message = createBaseDataBundle();
+    message.name = object.name ?? "";
+    message.arguments = object.arguments?.map((e) => e) || [];
+    message.operations = object.operations?.map((e) => Operation.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseOperation(): Operation {
+  return { relationshipsWrite: [], relationshipsDelete: [], attributesWrite: [], attributesDelete: [] };
+}
+
+export const Operation = {
+  encode(message: Operation, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.relationshipsWrite) {
+      writer.uint32(10).string(v!);
+    }
+    for (const v of message.relationshipsDelete) {
+      writer.uint32(18).string(v!);
+    }
+    for (const v of message.attributesWrite) {
+      writer.uint32(26).string(v!);
+    }
+    for (const v of message.attributesDelete) {
+      writer.uint32(34).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Operation {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOperation();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.relationshipsWrite.push(reader.string());
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.relationshipsDelete.push(reader.string());
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.attributesWrite.push(reader.string());
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.attributesDelete.push(reader.string());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Operation {
+    return {
+      relationshipsWrite: Array.isArray(object?.relationships_write)
+        ? object.relationships_write.map((e: any) => String(e))
+        : [],
+      relationshipsDelete: Array.isArray(object?.relationships_delete)
+        ? object.relationships_delete.map((e: any) => String(e))
+        : [],
+      attributesWrite: Array.isArray(object?.attributes_write)
+        ? object.attributes_write.map((e: any) => String(e))
+        : [],
+      attributesDelete: Array.isArray(object?.attributes_delete)
+        ? object.attributes_delete.map((e: any) => String(e))
+        : [],
+    };
+  },
+
+  toJSON(message: Operation): unknown {
+    const obj: any = {};
+    if (message.relationshipsWrite?.length) {
+      obj.relationships_write = message.relationshipsWrite;
+    }
+    if (message.relationshipsDelete?.length) {
+      obj.relationships_delete = message.relationshipsDelete;
+    }
+    if (message.attributesWrite?.length) {
+      obj.attributes_write = message.attributesWrite;
+    }
+    if (message.attributesDelete?.length) {
+      obj.attributes_delete = message.attributesDelete;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<Operation>): Operation {
+    return Operation.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<Operation>): Operation {
+    const message = createBaseOperation();
+    message.relationshipsWrite = object.relationshipsWrite?.map((e) => e) || [];
+    message.relationshipsDelete = object.relationshipsDelete?.map((e) => e) || [];
+    message.attributesWrite = object.attributesWrite?.map((e) => e) || [];
+    message.attributesDelete = object.attributesDelete?.map((e) => e) || [];
     return message;
   },
 };

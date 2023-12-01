@@ -10,6 +10,7 @@ import {
   checkResultFromJSON,
   checkResultToJSON,
   Context,
+  DataBundle,
   DataChanges,
   Entity,
   Expand,
@@ -516,6 +517,74 @@ export interface RelationshipDeleteRequest {
 /** RelationshipDeleteResponse */
 export interface RelationshipDeleteResponse {
   snapToken: string;
+}
+
+/**
+ * BundleRunRequest is used to request the execution of a bundle.
+ * It includes tenant_id, the name of the bundle, and additional arguments for execution.
+ */
+export interface BundleRunRequest {
+  tenantId: string;
+  /** Name of the bundle to be executed. */
+  name: string;
+  /** Additional key-value pairs for execution arguments. */
+  arguments: { [key: string]: string };
+}
+
+export interface BundleRunRequest_ArgumentsEntry {
+  key: string;
+  value: string;
+}
+
+/**
+ * BundleRunResponse is the response for a BundleRunRequest.
+ * It includes a snap_token, which may be used for tracking the execution or its results.
+ */
+export interface BundleRunResponse {
+  /** Token related to the bundle execution. */
+  snapToken: string;
+}
+
+/**
+ * BundleWriteRequest is used to request the writing of a bundle.
+ * It contains the tenant_id to identify the tenant and the Bundles object.
+ */
+export interface BundleWriteRequest {
+  tenantId: string;
+  /** Contains the bundle data to be written. */
+  bundles: DataBundle[];
+}
+
+/**
+ * BundleWriteResponse is the response for a BundleWriteRequest.
+ * It includes a name which could be used as an identifier or acknowledgment.
+ */
+export interface BundleWriteResponse {
+  /** Identifier or acknowledgment of the written bundle. */
+  names: string[];
+}
+
+export interface BundleReadRequest {
+  tenantId: string;
+  name: string;
+}
+
+export interface BundleReadResponse {
+  bundle: DataBundle | undefined;
+}
+
+/**
+ * BundleDeleteRequest is used to request the deletion of a bundle.
+ * It contains the tenant_id to specify the tenant and the name of the bundle to be deleted.
+ */
+export interface BundleDeleteRequest {
+  tenantId: string;
+  /** Name of the bundle to be deleted. */
+  name: string;
+}
+
+export interface BundleDeleteResponse {
+  name: string;
 }
 
 /** TenantCreateRequest is the message used for the request to create a tenant. */
@@ -4150,6 +4219,640 @@ export const RelationshipDeleteResponse = {
   },
 };
 
+function createBaseBundleRunRequest(): BundleRunRequest {
+  return { tenantId: "", name: "", arguments: {} };
+}
+
+export const BundleRunRequest = {
+  encode(message: BundleRunRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    Object.entries(message.arguments).forEach(([key, value]) => {
+      BundleRunRequest_ArgumentsEntry.encode({ key: key as any, value }, writer.uint32(26).fork()).ldelim();
+    });
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BundleRunRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBundleRunRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.tenantId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          const entry3 = BundleRunRequest_ArgumentsEntry.decode(reader, reader.uint32());
+          if (entry3.value !== undefined) {
+            message.arguments[entry3.key] = entry3.value;
+          }
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BundleRunRequest {
+    return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
+      name: isSet(object.name) ? String(object.name) : "",
+      arguments: isObject(object.arguments)
+        ? Object.entries(object.arguments).reduce<{ [key: string]: string }>((acc, [key, value]) => {
+          acc[key] = String(value);
+          return acc;
+        }, {})
+        : {},
+    };
+  },
+
+  toJSON(message: BundleRunRequest): unknown {
+    const obj: any = {};
+    if (message.tenantId !== "") {
+      obj.tenant_id = message.tenantId;
+    }
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.arguments) {
+      const entries = Object.entries(message.arguments);
+      if (entries.length > 0) {
+        obj.arguments = {};
+        entries.forEach(([k, v]) => {
+          obj.arguments[k] = v;
+        });
+      }
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BundleRunRequest>): BundleRunRequest {
+    return BundleRunRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BundleRunRequest>): BundleRunRequest {
+    const message = createBaseBundleRunRequest();
+    message.tenantId = object.tenantId ?? "";
+    message.name = object.name ?? "";
+    message.arguments = Object.entries(object.arguments ?? {}).reduce<{ [key: string]: string }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = String(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    return message;
+  },
+};
+
+function createBaseBundleRunRequest_ArgumentsEntry(): BundleRunRequest_ArgumentsEntry {
+  return { key: "", value: "" };
+}
+
+export const BundleRunRequest_ArgumentsEntry = {
+  encode(message: BundleRunRequest_ArgumentsEntry, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== "") {
+      writer.uint32(18).string(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BundleRunRequest_ArgumentsEntry {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBundleRunRequest_ArgumentsEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BundleRunRequest_ArgumentsEntry {
+    return { key: isSet(object.key) ? String(object.key) : "", value: isSet(object.value) ? String(object.value) : "" };
+  },
+
+  toJSON(message: BundleRunRequest_ArgumentsEntry): unknown {
+    const obj: any = {};
+    if (message.key !== "") {
+      obj.key = message.key;
+    }
+    if (message.value !== "") {
+      obj.value = message.value;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BundleRunRequest_ArgumentsEntry>): BundleRunRequest_ArgumentsEntry {
+    return BundleRunRequest_ArgumentsEntry.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BundleRunRequest_ArgumentsEntry>): BundleRunRequest_ArgumentsEntry {
+    const message = createBaseBundleRunRequest_ArgumentsEntry();
+    message.key = object.key ?? "";
+    message.value = object.value ?? "";
+    return message;
+  },
+};
+
+function createBaseBundleRunResponse(): BundleRunResponse {
+  return { snapToken: "" };
+}
+
+export const BundleRunResponse = {
+  encode(message: BundleRunResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.snapToken !== "") {
+      writer.uint32(10).string(message.snapToken);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BundleRunResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBundleRunResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.snapToken = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BundleRunResponse {
+    return { snapToken: isSet(object.snap_token) ? String(object.snap_token) : "" };
+  },
+
+  toJSON(message: BundleRunResponse): unknown {
+    const obj: any = {};
+    if (message.snapToken !== "") {
+      obj.snap_token = message.snapToken;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BundleRunResponse>): BundleRunResponse {
+    return BundleRunResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BundleRunResponse>): BundleRunResponse {
+    const message = createBaseBundleRunResponse();
+    message.snapToken = object.snapToken ?? "";
+    return message;
+  },
+};
+
+function createBaseBundleWriteRequest(): BundleWriteRequest {
+  return { tenantId: "", bundles: [] };
+}
+
+export const BundleWriteRequest = {
+  encode(message: BundleWriteRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
+    for (const v of message.bundles) {
+      DataBundle.encode(v!, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BundleWriteRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBundleWriteRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.tenantId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.bundles.push(DataBundle.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BundleWriteRequest {
+    return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
+      bundles: Array.isArray(object?.bundles) ? object.bundles.map((e: any) => DataBundle.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: BundleWriteRequest): unknown {
+    const obj: any = {};
+    if (message.tenantId !== "") {
+      obj.tenant_id = message.tenantId;
+    }
+    if (message.bundles?.length) {
+      obj.bundles = message.bundles.map((e) => DataBundle.toJSON(e));
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BundleWriteRequest>): BundleWriteRequest {
+    return BundleWriteRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BundleWriteRequest>): BundleWriteRequest {
+    const message = createBaseBundleWriteRequest();
+    message.tenantId = object.tenantId ?? "";
+    message.bundles = object.bundles?.map((e) => DataBundle.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseBundleWriteResponse(): BundleWriteResponse {
+  return { names: [] };
+}
+
+export const BundleWriteResponse = {
+  encode(message: BundleWriteResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.names) {
+      writer.uint32(10).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BundleWriteResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBundleWriteResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.names.push(reader.string());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BundleWriteResponse {
+    return { names: Array.isArray(object?.names) ? object.names.map((e: any) => String(e)) : [] };
+  },
+
+  toJSON(message: BundleWriteResponse): unknown {
+    const obj: any = {};
+    if (message.names?.length) {
+      obj.names = message.names;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BundleWriteResponse>): BundleWriteResponse {
+    return BundleWriteResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BundleWriteResponse>): BundleWriteResponse {
+    const message = createBaseBundleWriteResponse();
+    message.names = object.names?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseBundleReadRequest(): BundleReadRequest {
+  return { tenantId: "", name: "" };
+}
+
+export const BundleReadRequest = {
+  encode(message: BundleReadRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BundleReadRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBundleReadRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.tenantId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BundleReadRequest {
+    return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
+      name: isSet(object.name) ? String(object.name) : "",
+    };
+  },
+
+  toJSON(message: BundleReadRequest): unknown {
+    const obj: any = {};
+    if (message.tenantId !== "") {
+      obj.tenant_id = message.tenantId;
+    }
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BundleReadRequest>): BundleReadRequest {
+    return BundleReadRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BundleReadRequest>): BundleReadRequest {
+    const message = createBaseBundleReadRequest();
+    message.tenantId = object.tenantId ?? "";
+    message.name = object.name ?? "";
+    return message;
+  },
+};
+
+function createBaseBundleReadResponse(): BundleReadResponse {
+  return { bundle: undefined };
+}
+
+export const BundleReadResponse = {
+  encode(message: BundleReadResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.bundle !== undefined) {
+      DataBundle.encode(message.bundle, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BundleReadResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBundleReadResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.bundle = DataBundle.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BundleReadResponse {
+    return { bundle: isSet(object.bundle) ? DataBundle.fromJSON(object.bundle) : undefined };
+  },
+
+  toJSON(message: BundleReadResponse): unknown {
+    const obj: any = {};
+    if (message.bundle !== undefined) {
+      obj.bundle = DataBundle.toJSON(message.bundle);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BundleReadResponse>): BundleReadResponse {
+    return BundleReadResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BundleReadResponse>): BundleReadResponse {
+    const message = createBaseBundleReadResponse();
+    message.bundle = (object.bundle !== undefined && object.bundle !== null)
+      ? DataBundle.fromPartial(object.bundle)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseBundleDeleteRequest(): BundleDeleteRequest {
+  return { tenantId: "", name: "" };
+}
+
+export const BundleDeleteRequest = {
+  encode(message: BundleDeleteRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BundleDeleteRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBundleDeleteRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.tenantId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BundleDeleteRequest {
+    return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
+      name: isSet(object.name) ? String(object.name) : "",
+    };
+  },
+
+  toJSON(message: BundleDeleteRequest): unknown {
+    const obj: any = {};
+    if (message.tenantId !== "") {
+      obj.tenant_id = message.tenantId;
+    }
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BundleDeleteRequest>): BundleDeleteRequest {
+    return BundleDeleteRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BundleDeleteRequest>): BundleDeleteRequest {
+    const message = createBaseBundleDeleteRequest();
+    message.tenantId = object.tenantId ?? "";
+    message.name = object.name ?? "";
+    return message;
+  },
+};
+
+function createBaseBundleDeleteResponse(): BundleDeleteResponse {
+  return { name: "" };
+}
+
+export const BundleDeleteResponse = {
+  encode(message: BundleDeleteResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.name !== "") {
+      writer.uint32(10).string(message.name);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BundleDeleteResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBundleDeleteResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BundleDeleteResponse {
+    return { name: isSet(object.name) ? String(object.name) : "" };
+  },
+
+  toJSON(message: BundleDeleteResponse): unknown {
+    const obj: any = {};
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BundleDeleteResponse>): BundleDeleteResponse {
+    return BundleDeleteResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BundleDeleteResponse>): BundleDeleteResponse {
+    const message = createBaseBundleDeleteResponse();
+    message.name = object.name ?? "";
+    return message;
+  },
+};
+
 function createBaseTenantCreateRequest(): TenantCreateRequest {
   return { id: "", name: "" };
 }
@@ -6688,6 +7391,102 @@ export const DataDefinition = {
         },
       },
     },
+    /** Executes or runs a specific bundle. This method is useful for processing or triggering actions based on the bundle's data. */
+    runBundle: {
+      name: "RunBundle",
+      requestType: BundleRunRequest,
+      requestStream: false,
+      responseType: BundleRunResponse,
+      responseStream: false,
+      options: {
+        _unknownFields: {
+          8338: [
+            Buffer.from([
+              30,
+              10,
+              4,
+              68,
+              97,
+              116,
+              97,
+              18,
+              10,
+              114,
+              117,
+              110,
+              32,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+              42,
+              10,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+              46,
+              114,
+              117,
+              110,
+            ]),
+          ],
+          578365826: [
+            Buffer.from([
+              44,
+              58,
+              1,
+              42,
+              34,
+              39,
+              47,
+              118,
+              49,
+              47,
+              116,
+              101,
+              110,
+              97,
+              110,
+              116,
+              115,
+              47,
+              123,
+              116,
+              101,
+              110,
+              97,
+              110,
+              116,
+              95,
+              105,
+              100,
+              125,
+              47,
+              100,
+              97,
+              116,
+              97,
+              47,
+              114,
+              117,
+              110,
+              45,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+            ]),
+          ],
+        },
+      },
+    },
   },
 } as const;
 
@@ -6716,6 +7515,8 @@ export interface DataServiceImplementation<CallContextExt = {}> {
     request: RelationshipDeleteRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<RelationshipDeleteResponse>>;
+  /** Executes or runs a specific bundle. This method is useful for processing or triggering actions based on the bundle's data. */
+  runBundle(request: BundleRunRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BundleRunResponse>>;
 }
 
 export interface DataClient<CallOptionsExt = {}> {
@@ -6743,6 +7544,337 @@ export interface DataClient<CallOptionsExt = {}> {
     request: DeepPartial<RelationshipDeleteRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<RelationshipDeleteResponse>;
+  /** Executes or runs a specific bundle. This method is useful for processing or triggering actions based on the bundle's data. */
+  runBundle(request: DeepPartial<BundleRunRequest>, options?: CallOptions & CallOptionsExt): Promise<BundleRunResponse>;
+}
+
+export type BundleDefinition = typeof BundleDefinition;
+export const BundleDefinition = {
+  name: "Bundle",
+  fullName: "base.v1.Bundle",
+  methods: {
+    /** Writes a bundle of data for a specific operation. This is a general purpose method to handle writing data bundles. */
+    write: {
+      name: "Write",
+      requestType: BundleWriteRequest,
+      requestStream: false,
+      responseType: BundleWriteResponse,
+      responseStream: false,
+      options: {
+        _unknownFields: {
+          8338: [
+            Buffer.from([
+              36,
+              10,
+              6,
+              66,
+              117,
+              110,
+              100,
+              108,
+              101,
+              18,
+              12,
+              119,
+              114,
+              105,
+              116,
+              101,
+              32,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+              42,
+              12,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+              46,
+              119,
+              114,
+              105,
+              116,
+              101,
+            ]),
+          ],
+          578365826: [
+            Buffer.from([
+              41,
+              58,
+              1,
+              42,
+              34,
+              36,
+              47,
+              118,
+              49,
+              47,
+              116,
+              101,
+              110,
+              97,
+              110,
+              116,
+              115,
+              47,
+              123,
+              116,
+              101,
+              110,
+              97,
+              110,
+              116,
+              95,
+              105,
+              100,
+              125,
+              47,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+              47,
+              119,
+              114,
+              105,
+              116,
+              101,
+            ]),
+          ],
+        },
+      },
+    },
+    /** Reads a data bundle based on a specified request. This method is tailored for retrieving data bundles. */
+    read: {
+      name: "Read",
+      requestType: BundleReadRequest,
+      requestStream: false,
+      responseType: BundleReadResponse,
+      responseStream: false,
+      options: {
+        _unknownFields: {
+          8338: [
+            Buffer.from([
+              34,
+              10,
+              6,
+              66,
+              117,
+              110,
+              100,
+              108,
+              101,
+              18,
+              11,
+              114,
+              101,
+              97,
+              100,
+              32,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+              42,
+              11,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+              46,
+              114,
+              101,
+              97,
+              100,
+            ]),
+          ],
+          578365826: [
+            Buffer.from([
+              40,
+              58,
+              1,
+              42,
+              34,
+              35,
+              47,
+              118,
+              49,
+              47,
+              116,
+              101,
+              110,
+              97,
+              110,
+              116,
+              115,
+              47,
+              123,
+              116,
+              101,
+              110,
+              97,
+              110,
+              116,
+              95,
+              105,
+              100,
+              125,
+              47,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+              47,
+              114,
+              101,
+              97,
+              100,
+            ]),
+          ],
+        },
+      },
+    },
+    /** Deletes a specific data bundle. This method is used to remove existing bundles from the system. */
+    delete: {
+      name: "Delete",
+      requestType: BundleDeleteRequest,
+      requestStream: false,
+      responseType: BundleDeleteResponse,
+      responseStream: false,
+      options: {
+        _unknownFields: {
+          8338: [
+            Buffer.from([
+              38,
+              10,
+              6,
+              66,
+              117,
+              110,
+              100,
+              108,
+              101,
+              18,
+              13,
+              100,
+              101,
+              108,
+              101,
+              116,
+              101,
+              32,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+              42,
+              13,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+              46,
+              100,
+              101,
+              108,
+              101,
+              116,
+              101,
+            ]),
+          ],
+          578365826: [
+            Buffer.from([
+              42,
+              58,
+              1,
+              42,
+              34,
+              37,
+              47,
+              118,
+              49,
+              47,
+              116,
+              101,
+              110,
+              97,
+              110,
+              116,
+              115,
+              47,
+              123,
+              116,
+              101,
+              110,
+              97,
+              110,
+              116,
+              95,
+              105,
+              100,
+              125,
+              47,
+              98,
+              117,
+              110,
+              100,
+              108,
+              101,
+              47,
+              100,
+              101,
+              108,
+              101,
+              116,
+              101,
+            ]),
+          ],
+        },
+      },
+    },
+  },
+} as const;
+
+export interface BundleServiceImplementation<CallContextExt = {}> {
+  /** Writes a bundle of data for a specific operation. This is a general purpose method to handle writing data bundles. */
+  write(request: BundleWriteRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BundleWriteResponse>>;
+  /** Reads a data bundle based on a specified request. This method is tailored for retrieving data bundles. */
+  read(request: BundleReadRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BundleReadResponse>>;
+  /** Deletes a specific data bundle. This method is used to remove existing bundles from the system. */
+  delete(
+    request: BundleDeleteRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<BundleDeleteResponse>>;
+}
+
+export interface BundleClient<CallOptionsExt = {}> {
+  /** Writes a bundle of data for a specific operation. This is a general purpose method to handle writing data bundles. */
+  write(request: DeepPartial<BundleWriteRequest>, options?: CallOptions & CallOptionsExt): Promise<BundleWriteResponse>;
+  /** Reads a data bundle based on a specified request. This method is tailored for retrieving data bundles. */
+  read(request: DeepPartial<BundleReadRequest>, options?: CallOptions & CallOptionsExt): Promise<BundleReadResponse>;
+  /** Deletes a specific data bundle. This method is used to remove existing bundles from the system. */
+  delete(
+    request: DeepPartial<BundleDeleteRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<BundleDeleteResponse>;
 }
 
 export type TenancyDefinition = typeof TenancyDefinition;
