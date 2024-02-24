@@ -10,6 +10,10 @@ export enum ErrorCode {
   ERROR_CODE_MISSING_BEARER_TOKEN = 1001,
   ERROR_CODE_UNAUTHENTICATED = 1002,
   ERROR_CODE_MISSING_TENANT_ID = 1003,
+  ERROR_CODE_INVALID_AUDIENCE = 1004,
+  ERROR_CODE_INVALID_CLAIMS = 1005,
+  ERROR_CODE_INVALID_ISSUER = 1006,
+  ERROR_CODE_INVALID_BEARER_TOKEN = 1007,
   /** ERROR_CODE_VALIDATION - validation */
   ERROR_CODE_VALIDATION = 2000,
   ERROR_CODE_UNDEFINED_CHILD_TYPE = 2002,
@@ -52,6 +56,7 @@ export enum ErrorCode {
   ERROR_CODE_ATTRIBUTE_DEFINITION_NOT_FOUND = 4010,
   ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH = 4011,
   ERROR_CODE_BUNDLE_NOT_FOUND = 4012,
+  ERROR_CODE_RULE_DEFINITION_NOT_FOUND = 4013,
   /** ERROR_CODE_INTERNAL - internal */
   ERROR_CODE_INTERNAL = 5000,
   ERROR_CODE_CANCELLED = 5001,
@@ -65,6 +70,7 @@ export enum ErrorCode {
   ERROR_CODE_ROLLBACK = 5010,
   ERROR_CODE_EXCLUSION_REQUIRES_MORE_THAN_ONE_FUNCTION = 5011,
   ERROR_CODE_NOT_IMPLEMENTED = 5012,
+  ERROR_CODE_DATASTORE = 5013,
   UNRECOGNIZED = -1,
 }
 
@@ -82,6 +88,18 @@ export function errorCodeFromJSON(object: any): ErrorCode {
     case 1003:
     case "ERROR_CODE_MISSING_TENANT_ID":
       return ErrorCode.ERROR_CODE_MISSING_TENANT_ID;
+    case 1004:
+    case "ERROR_CODE_INVALID_AUDIENCE":
+      return ErrorCode.ERROR_CODE_INVALID_AUDIENCE;
+    case 1005:
+    case "ERROR_CODE_INVALID_CLAIMS":
+      return ErrorCode.ERROR_CODE_INVALID_CLAIMS;
+    case 1006:
+    case "ERROR_CODE_INVALID_ISSUER":
+      return ErrorCode.ERROR_CODE_INVALID_ISSUER;
+    case 1007:
+    case "ERROR_CODE_INVALID_BEARER_TOKEN":
+      return ErrorCode.ERROR_CODE_INVALID_BEARER_TOKEN;
     case 2000:
     case "ERROR_CODE_VALIDATION":
       return ErrorCode.ERROR_CODE_VALIDATION;
@@ -202,6 +220,9 @@ export function errorCodeFromJSON(object: any): ErrorCode {
     case 4012:
     case "ERROR_CODE_BUNDLE_NOT_FOUND":
       return ErrorCode.ERROR_CODE_BUNDLE_NOT_FOUND;
+    case 4013:
+    case "ERROR_CODE_RULE_DEFINITION_NOT_FOUND":
+      return ErrorCode.ERROR_CODE_RULE_DEFINITION_NOT_FOUND;
     case 5000:
     case "ERROR_CODE_INTERNAL":
       return ErrorCode.ERROR_CODE_INTERNAL;
@@ -238,6 +259,9 @@ export function errorCodeFromJSON(object: any): ErrorCode {
     case 5012:
     case "ERROR_CODE_NOT_IMPLEMENTED":
       return ErrorCode.ERROR_CODE_NOT_IMPLEMENTED;
+    case 5013:
+    case "ERROR_CODE_DATASTORE":
+      return ErrorCode.ERROR_CODE_DATASTORE;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -255,6 +279,14 @@ export function errorCodeToJSON(object: ErrorCode): string {
       return "ERROR_CODE_UNAUTHENTICATED";
     case ErrorCode.ERROR_CODE_MISSING_TENANT_ID:
       return "ERROR_CODE_MISSING_TENANT_ID";
+    case ErrorCode.ERROR_CODE_INVALID_AUDIENCE:
+      return "ERROR_CODE_INVALID_AUDIENCE";
+    case ErrorCode.ERROR_CODE_INVALID_CLAIMS:
+      return "ERROR_CODE_INVALID_CLAIMS";
+    case ErrorCode.ERROR_CODE_INVALID_ISSUER:
+      return "ERROR_CODE_INVALID_ISSUER";
+    case ErrorCode.ERROR_CODE_INVALID_BEARER_TOKEN:
+      return "ERROR_CODE_INVALID_BEARER_TOKEN";
     case ErrorCode.ERROR_CODE_VALIDATION:
       return "ERROR_CODE_VALIDATION";
     case ErrorCode.ERROR_CODE_UNDEFINED_CHILD_TYPE:
@@ -335,6 +367,8 @@ export function errorCodeToJSON(object: ErrorCode): string {
       return "ERROR_CODE_ATTRIBUTE_TYPE_MISMATCH";
     case ErrorCode.ERROR_CODE_BUNDLE_NOT_FOUND:
       return "ERROR_CODE_BUNDLE_NOT_FOUND";
+    case ErrorCode.ERROR_CODE_RULE_DEFINITION_NOT_FOUND:
+      return "ERROR_CODE_RULE_DEFINITION_NOT_FOUND";
     case ErrorCode.ERROR_CODE_INTERNAL:
       return "ERROR_CODE_INTERNAL";
     case ErrorCode.ERROR_CODE_CANCELLED:
@@ -359,6 +393,8 @@ export function errorCodeToJSON(object: ErrorCode): string {
       return "ERROR_CODE_EXCLUSION_REQUIRES_MORE_THAN_ONE_FUNCTION";
     case ErrorCode.ERROR_CODE_NOT_IMPLEMENTED:
       return "ERROR_CODE_NOT_IMPLEMENTED";
+    case ErrorCode.ERROR_CODE_DATASTORE:
+      return "ERROR_CODE_DATASTORE";
     case ErrorCode.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";

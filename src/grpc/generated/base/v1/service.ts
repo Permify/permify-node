@@ -339,6 +339,47 @@ export interface SchemaReadResponse {
 }
 
 /**
+ * SchemaListRequest is the request message for the List method in the Schema service.
+ * It contains tenant_id for which the schemas are to be listed.
+ */
+export interface SchemaListRequest {
+  /**
+   * tenant_id is a string that identifies the tenant. It must match the pattern "[a-zA-Z0-9-,]+",
+   * be a maximum of 64 bytes, and must not be empty.
+   */
+  tenantId: string;
+  /**
+   * page_size is the number of tenants to be returned in the response.
+   * The value should be between 1 and 100.
+   */
+  pageSize: number;
+  /**
+   * continuous_token is an optional parameter used for pagination.
+   * It should be the value received in the previous response.
+   */
+  continuousToken: string;
+}
+
+/**
+ * SchemaListResponse is the response message for the List method in the Schema service.
+ * It returns a paginated list of schemas
+ */
+export interface SchemaListResponse {
+  /** head of the schemas is the latest version available for the tenant */
+  head: string;
+  /** list of schema versions with creation timestamps */
+  schemas: SchemaList[];
+  /** continuous_token is a string that can be used to paginate and retrieve the next set of results. */
+  continuousToken: string;
+}
+
+/** SchemaList provides a list of schema versions with their corresponding creation timestamps */
+export interface SchemaList {
+  version: string;
+  createdAt: string;
+}
+
+/**
  * DataWriteRequest defines the structure of a request for writing data.
  * It contains the necessary information such as tenant_id, metadata,
  * tuples and attributes for the write operation.
@@ -2999,6 +3040,258 @@ export const SchemaReadResponse = {
     message.schema = (object.schema !== undefined && object.schema !== null)
       ? SchemaDefinition1.fromPartial(object.schema)
       : undefined;
+    return message;
+  },
+};
+
+function createBaseSchemaListRequest(): SchemaListRequest {
+  return { tenantId: "", pageSize: 0, continuousToken: "" };
+}
+
+export const SchemaListRequest = {
+  encode(message: SchemaListRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
+    }
+    if (message.pageSize !== 0) {
+      writer.uint32(16).uint32(message.pageSize);
+    }
+    if (message.continuousToken !== "") {
+      writer.uint32(26).string(message.continuousToken);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SchemaListRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSchemaListRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.tenantId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.pageSize = reader.uint32();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.continuousToken = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SchemaListRequest {
+    return {
+      tenantId: isSet(object.tenant_id) ? String(object.tenant_id) : "",
+      pageSize: isSet(object.page_size) ? Number(object.page_size) : 0,
+      continuousToken: isSet(object.continuous_token) ? String(object.continuous_token) : "",
+    };
+  },
+
+  toJSON(message: SchemaListRequest): unknown {
+    const obj: any = {};
+    if (message.tenantId !== "") {
+      obj.tenant_id = message.tenantId;
+    }
+    if (message.pageSize !== 0) {
+      obj.page_size = Math.round(message.pageSize);
+    }
+    if (message.continuousToken !== "") {
+      obj.continuous_token = message.continuousToken;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<SchemaListRequest>): SchemaListRequest {
+    return SchemaListRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<SchemaListRequest>): SchemaListRequest {
+    const message = createBaseSchemaListRequest();
+    message.tenantId = object.tenantId ?? "";
+    message.pageSize = object.pageSize ?? 0;
+    message.continuousToken = object.continuousToken ?? "";
+    return message;
+  },
+};
+
+function createBaseSchemaListResponse(): SchemaListResponse {
+  return { head: "", schemas: [], continuousToken: "" };
+}
+
+export const SchemaListResponse = {
+  encode(message: SchemaListResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.head !== "") {
+      writer.uint32(10).string(message.head);
+    }
+    for (const v of message.schemas) {
+      SchemaList.encode(v!, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.continuousToken !== "") {
+      writer.uint32(26).string(message.continuousToken);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SchemaListResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSchemaListResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.head = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.schemas.push(SchemaList.decode(reader, reader.uint32()));
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.continuousToken = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SchemaListResponse {
+    return {
+      head: isSet(object.head) ? String(object.head) : "",
+      schemas: Array.isArray(object?.schemas) ? object.schemas.map((e: any) => SchemaList.fromJSON(e)) : [],
+      continuousToken: isSet(object.continuous_token) ? String(object.continuous_token) : "",
+    };
+  },
+
+  toJSON(message: SchemaListResponse): unknown {
+    const obj: any = {};
+    if (message.head !== "") {
+      obj.head = message.head;
+    }
+    if (message.schemas?.length) {
+      obj.schemas = message.schemas.map((e) => SchemaList.toJSON(e));
+    }
+    if (message.continuousToken !== "") {
+      obj.continuous_token = message.continuousToken;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<SchemaListResponse>): SchemaListResponse {
+    return SchemaListResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<SchemaListResponse>): SchemaListResponse {
+    const message = createBaseSchemaListResponse();
+    message.head = object.head ?? "";
+    message.schemas = object.schemas?.map((e) => SchemaList.fromPartial(e)) || [];
+    message.continuousToken = object.continuousToken ?? "";
+    return message;
+  },
+};
+
+function createBaseSchemaList(): SchemaList {
+  return { version: "", createdAt: "" };
+}
+
+export const SchemaList = {
+  encode(message: SchemaList, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.version !== "") {
+      writer.uint32(10).string(message.version);
+    }
+    if (message.createdAt !== "") {
+      writer.uint32(18).string(message.createdAt);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SchemaList {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSchemaList();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.version = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SchemaList {
+    return {
+      version: isSet(object.version) ? String(object.version) : "",
+      createdAt: isSet(object.created_at) ? String(object.created_at) : "",
+    };
+  },
+
+  toJSON(message: SchemaList): unknown {
+    const obj: any = {};
+    if (message.version !== "") {
+      obj.version = message.version;
+    }
+    if (message.createdAt !== "") {
+      obj.created_at = message.createdAt;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<SchemaList>): SchemaList {
+    return SchemaList.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<SchemaList>): SchemaList {
+    const message = createBaseSchemaList();
+    message.version = object.version ?? "";
+    message.createdAt = object.createdAt ?? "";
     return message;
   },
 };
@@ -6691,6 +6984,122 @@ export const SchemaDefinition = {
         },
       },
     },
+    /** List is an RPC that allows you to list all authorization models. */
+    list: {
+      name: "List",
+      requestType: SchemaListRequest,
+      requestStream: false,
+      responseType: SchemaListResponse,
+      responseStream: false,
+      options: {
+        _unknownFields: {
+          8338: [
+            Buffer.from([
+              53,
+              10,
+              6,
+              83,
+              99,
+              104,
+              101,
+              109,
+              97,
+              18,
+              29,
+              108,
+              105,
+              115,
+              116,
+              32,
+              97,
+              108,
+              108,
+              32,
+              97,
+              117,
+              116,
+              104,
+              111,
+              114,
+              105,
+              122,
+              97,
+              116,
+              105,
+              111,
+              110,
+              32,
+              109,
+              111,
+              100,
+              101,
+              108,
+              115,
+              42,
+              12,
+              115,
+              99,
+              104,
+              101,
+              109,
+              97,
+              115,
+              46,
+              108,
+              105,
+              115,
+              116,
+            ]),
+          ],
+          578365826: [
+            Buffer.from([
+              41,
+              58,
+              1,
+              42,
+              34,
+              36,
+              47,
+              118,
+              49,
+              47,
+              116,
+              101,
+              110,
+              97,
+              110,
+              116,
+              115,
+              47,
+              123,
+              116,
+              101,
+              110,
+              97,
+              110,
+              116,
+              95,
+              105,
+              100,
+              125,
+              47,
+              115,
+              99,
+              104,
+              101,
+              109,
+              97,
+              115,
+              47,
+              108,
+              105,
+              115,
+              116,
+            ]),
+          ],
+        },
+      },
+    },
   },
 } as const;
 
@@ -6699,6 +7108,8 @@ export interface SchemaServiceImplementation<CallContextExt = {}> {
   write(request: SchemaWriteRequest, context: CallContext & CallContextExt): Promise<DeepPartial<SchemaWriteResponse>>;
   /** Read is an RPC that allows you to read your authorization model. */
   read(request: SchemaReadRequest, context: CallContext & CallContextExt): Promise<DeepPartial<SchemaReadResponse>>;
+  /** List is an RPC that allows you to list all authorization models. */
+  list(request: SchemaListRequest, context: CallContext & CallContextExt): Promise<DeepPartial<SchemaListResponse>>;
 }
 
 export interface SchemaClient<CallOptionsExt = {}> {
@@ -6706,6 +7117,8 @@ export interface SchemaClient<CallOptionsExt = {}> {
   write(request: DeepPartial<SchemaWriteRequest>, options?: CallOptions & CallOptionsExt): Promise<SchemaWriteResponse>;
   /** Read is an RPC that allows you to read your authorization model. */
   read(request: DeepPartial<SchemaReadRequest>, options?: CallOptions & CallOptionsExt): Promise<SchemaReadResponse>;
+  /** List is an RPC that allows you to list all authorization models. */
+  list(request: DeepPartial<SchemaListRequest>, options?: CallOptions & CallOptionsExt): Promise<SchemaListResponse>;
 }
 
 /** The Data service provides RPC methods for managing data in the context of relationships and attributes. */
