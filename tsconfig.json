@@ -1,19 +1,5 @@
 {
   "compilerOptions": {
-    "outDir": "./dist",
-    "baseUrl": "./src",
-    "incremental": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true,
     "allowJs": true,
-  },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-    "src/**/*.test.*/*"
-  ]
+  }
 }

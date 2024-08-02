@@ -7,7 +7,7 @@ import {
     WatchService, 
     SchemaService, 
     PermissionService
-} from '@buf/permifyco_permify.grpc_node/base/v1/service_pb';
+} from '@buf/permifyco_permify.grpc_node/base/v1/service_grpc_pb';
 
 
 import {Config} from "./config";
