@@ -1,5 +1,4 @@
 import * as permify from ".";
-import { CheckResult, BooleanValue } from '@buf/permifyco_permify.grpc_node/base/v1/base_pb';
 import { Any } from "google-protobuf/google/protobuf/any_pb";
 
 describe("clients test", () => {
@@ -59,7 +58,7 @@ describe("clients test", () => {
             // Perform the permission check
             client.permission.check(permissionCheckRequest).then((response1_2: permify.grpc.payload.PermissionCheckResponse) => {
                 // Verify the response
-                expect(response1_2.toObject().can).toBe(CheckResult.CHECK_RESULT_DENIED);
+                expect(response1_2.toObject().can).toBe(permify.grpc.base.CheckResult.CHECK_RESULT_DENIED);
                 done();
             });
         });
@@ -73,7 +72,7 @@ describe("clients test", () => {
         });
 
         // Create a BooleanValue message
-        let booleanValue = new BooleanValue();
+        let booleanValue = new permify.grpc.base.BooleanValue();
         booleanValue.setData(true);
 
         // Create an Any message to wrap the BooleanValue

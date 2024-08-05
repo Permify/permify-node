@@ -30,16 +30,20 @@ yarn add @permify/permify-node
 ### Create a new tenant
 
 ```typescript
-const permify = require("@permify/permify-node");
+import * as permify from "@permify/permify-node";
 
-const client = new permify.grpc.newClient({
+
+const request = new permify.grpc.payload.TenantCreateRequest();
+request.setId("t1");
+request.setName("Tenant 1");
+
+const client = permify.grpc.newClient({
     endpoint: "localhost:3478",
-})
+    cert: undefined
+});
 
-client.tenancy.create({
-   id: "t1",
-   name: "tenant 1"
-}).then((response) => {
+client.tenancy.create(request).then((response) => {
+    console.log(response);
     // handle response
 })
 ```
@@ -47,22 +51,31 @@ client.tenancy.create({
 ### Write Schema
 
 ```typescript
-const permify = require("@permify/permify-node");
+import * as permify from "@permify/permify-node";
 
-const client = new permify.grpc.newClient({
+const client = permify.grpc.newClient({
     endpoint: "localhost:3478",
-})
+    cert: undefined
+});
 
-client.schema.write({
-    tenantId: "t1",
-    schema: `
+// Define the schema
+let schema = `
     entity user {}
+    
     entity document {
-         relation viewer @user
-         action view = viewer
+       relation viewer @user
+       
+       action view = viewer
     }
-    `
-}).then((response) => {
+`;
+
+// Create and set the SchemaWriteRequest
+let schemaWriteRequest = new permify.grpc.payload.SchemaWriteRequest();
+schemaWriteRequest.setTenantId("t1");
+schemaWriteRequest.setSchema(schema);
+
+// Write the schema
+client.schema.write(schemaWriteRequest).then((response) => {
     // handle response
 })
 ```
@@ -70,18 +83,21 @@ client.schema.write({
 ### Write Relationships
 
 ```typescript
-const permify = require("@permify/permify-node");
+import * as permify from "@permify/permify-node";
 
-const client = new permify.grpc.newClient({
+const client = permify.grpc.newClient({
     endpoint: "localhost:3478",
-})
+    cert: undefined
+});
 
-client.relationship.write({
-    tenantId: "t1",
-    metadata: {
-        schemaVersion: ""
-    },
-    tuples: [{
+// Create and set the RelationshipWriteRequest
+let relationshipWriteRequest = new permify.grpc.payload.SchemaWriteRequest();
+relationshipWriteRequest.setTenantId("t1");
+relationshipWriteRequest.setMetadata(new permify.grpc.payload.SchemaWriteRequestMetadata());
+
+// Create the tuple list
+let tupleList = [];
+let tuples = [{
         entity: {
             type: "document",
             id: "1"
@@ -91,8 +107,29 @@ client.relationship.write({
             type: "user",
             id: "1"
         }
-    }]
-}).then((response) => {
+    }];
+
+tuples.forEach(t => {
+    let tuple = new permify.grpc.payload.Tuple();
+
+    let entity = new permify.grpc.payload.Entity();
+    entity.setType(t.entity.type);
+    entity.setId(t.entity.id);
+
+    let subject = new permify.grpc.payload.Subject();
+    subject.setType(t.subject.type);
+    subject.setId(t.subject.id);
+
+    tuple.setEntity(entity);
+    tuple.setRelation(t.relation);
+    tuple.setSubject(subject);
+
+    tupleList.push(tuple);
+});
+
+relationshipWriteRequest.setTuplesList(tupleList);
+
+client.relationship.write(relationshipWriteRequest).then((response) => {
     // handle response
 })
 ```
@@ -100,70 +137,79 @@ client.relationship.write({
 ### Check
 
 ```typescript
-const permify = require("@permify/permify-node");
-const {PermissionCheckResponse_Result} = require("@permify/permify-node/dist/src/grpc/generated/base/v1/service");
+import * as permify from "@permify/permify-node";
 
-const client = new permify.grpc.newClient({
+const client = permify.grpc.newClient({
     endpoint: "localhost:3478",
-})
+    cert: undefined
+});
 
-client.permission.check({
-    tenantId: "t1",
-    metadata: {
-        snapToken: "",
-        schemaVersion: "",
-        depth: 20
-    },
-    entity: {
-        type: "document",
-        id: "1"
-    },
-    permission: "view",
-    subject: {
-        type: "user",
-        id: "3"
-    }
-}).then((response) => {
-    if (response.can === PermissionCheckResponse_Result.RESULT_ALLOWED) {
+// Create and set the PermissionCheckRequest
+let permissionCheckRequest = new permify.grpc.payload.PermissionCheckRequest();
+permissionCheckRequest.setTenantId("t1");
+permissionCheckRequest.setMetadata(new permify.grpc.payload.PermissionCheckRequestMetadata());
+
+// Set the entity details
+let permissionCheckRequestEntity = new permify.grpc.payload.Entity();
+permissionCheckRequestEntity.setType("document");
+permissionCheckRequestEntity.setId("1");
+permissionCheckRequest.setEntity(permissionCheckRequestEntity);
+
+// Set the permission to check
+permissionCheckRequest.setPermission("view");
+
+// Set the subject details
+let permissionCheckRequestSubject = new permify.grpc.payload.Subject();
+permissionCheckRequestSubject.setType("user");
+permissionCheckRequestSubject.setId("3");
+permissionCheckRequest.setSubject(permissionCheckRequestSubject);
+
+// Perform the permission check
+client.permission.check(permissionCheckRequest).then((response: permify.grpc.payload.PermissionCheckResponse) => {
+    if (response.can === permify.grpc.base.CheckResult.CHECK_RESULT_ALLOWED) {
         console.log("RESULT_ALLOWED")
     } else {
         console.log("RESULT_DENIED")
     }
-})
+});
 ```
 
 ### Streaming Calls
 
 ```typescript
-const permify = require("@permify/permify-node");
-const {PermissionLookupEntityStreamResponse} = require("@permify/permify-node/dist/src/grpc/generated/base/v1/service");
+import * as permify from "@permify/permify-node";
 
 function main() {
-    const client = new permify.grpc.newClient({
+    const client = permify.grpc.newClient({
         endpoint: "localhost:3478",
-    })
+        cert: undefined
+    });
 
-    let res = client.permission.lookupEntityStream({
-        tenantId: "t1",
-        metadata: {
-            snapToken: "",
-            schemaVersion: "",
-            depth: 20
-        },
-        entityType: "document",
-        permission: "view",
-        subject: {
-            type: "user",
-            id: "1"
-        }
-    })
+    // Create and set the PermissionLookupEntityRequest
+    let lookupEntityStreamRequest = new permify.grpc.payload.PermissionLookupEntityRequest();
+    lookupEntityStreamRequest.setTenantId("t1");
 
+    // Set the request metadata
+    lookupEntityStreamRequest.setMetadata(new permify.grpc.payload.PermissionLookupEntityRequestMetadata());
+
+    // Set the entity type and permission
+    lookupEntityStreamRequest.setEntityType("document");
+    lookupEntityStreamRequest.setPermission("view");
+
+    // Set the subject details
+    let subject = new permify.grpc.payload.Subject();
+    subject.setType("user");
+    subject.setId("1");
+    lookupEntityStreamRequest.setSubject(subject);
+
+    // Perform the lookup entity stream
+    const res = client.permission.lookupEntityStream(lookupEntityStreamRequest);
     handle(res)
 }
 
-async function handle(res: AsyncIterable<PermissionLookupEntityStreamResponse>) {
+async function handle(res: AsyncIterable<permify.grpc.payload.PermissionLookupEntityStreamResponse>) {
     for await (const response of res) {
-        // response.entityId
+        // response.toObject().entityId
     }
 }
 ```
@@ -173,27 +219,25 @@ async function handle(res: AsyncIterable<PermissionLookupEntityStreamResponse>) 
 #### Access Token Interceptor
 
 ```typescript
-const permify = require("@permify/permify-node");
-const {newAccessTokenInterceptor} = require("@permify/permify-node/dist/src/grpc");
+import * as permify from "@permify/permify-node";
 
 const client = new permify.grpc.newClient({
     endpoint: "localhost:3478",
-}, newAccessTokenInterceptor("YOUR_TOKEN"))
+}, permify.grpc.newAccessTokenInterceptor("YOUR_TOKEN"))
 ```
 
 ### Certs
 
 ```typescript
-import {grpc as permifyGrpcClient} from "@permify/permify-node";
-import {newAccessTokenInterceptor} from "@permify/permify-node/dist/src/grpc";
+import * as permify from "@permify/permify-node";
 import fs from 'fs';
 
 const cert = fs.readFileSync('path/to/cert.pem');
 
-const client = new permifyGrpcClient.newClient({
+const client = new permify.grpc.newClient({
     endpoint: "localhost:3478",
     cert: cert,
-}, newAccessTokenInterceptor("YOUR_TOKEN"))
+}, permify.grpc.newAccessTokenInterceptor("YOUR_TOKEN"))
 ```
 
 Permify is an **open-source authorization service** for creating and maintaining fine-grained authorizations accross
