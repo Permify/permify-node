@@ -7,7 +7,6 @@
     "baseUrl": "./src",
     "incremental": true,
     "skipLibCheck": true,
-    "strict": true,
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
