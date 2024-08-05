@@ -16,6 +16,7 @@ This client makes it easy to interact with [Permify](https://github.com/Permify/
 Use npm to install:
 
 ```shell
+npm config set @buf:registry https://buf.build/gen/npm/v1/
 npm install @permify/permify-node
 ```
 
