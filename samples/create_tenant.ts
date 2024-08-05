@@ -1,12 +1,9 @@
-import * as permify from '../src';
+import * as permify from "@permify/permify-node";
 
 
-const request = new permify.grpc.payload.TenantCreateRequest({
-    id: "t144444",
-    name: "lvksv" 
-});
-request.setId("t13333");
-request.setName("lsjv");
+const request = new permify.grpc.payload.TenantCreateRequest();
+request.setId("t1");
+request.setName("Tenant 1");
 
 const client = permify.grpc.newClient({
     endpoint: "localhost:3478",
@@ -15,6 +12,5 @@ const client = permify.grpc.newClient({
 
 client.tenancy.create(request).then((response) => {
     console.log(response);
-
     // handle response
 })
