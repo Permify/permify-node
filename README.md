@@ -23,6 +23,7 @@ npm install @permify/permify-node
 Use yarn to install:
 
 ```shell
+yarn config set npmScopes.buf.npmRegistryServer https://buf.build/gen/npm/v1/
 yarn add @permify/permify-node
 ```
 
