@@ -23,12 +23,10 @@ import {Config} from "./config";
  * @returns A new gRPC service client for the Permission API of Permify.
  */
 export function newClient(conf: Config, ...interceptors: ClientMiddleware[]) {
-    let channel;
-    if (conf.cert != null) {
-        channel = createChannel(conf.endpoint, ChannelCredentials.createSsl(conf.cert));
-    } else {
-        channel = createChannel(conf.endpoint);
-    }
+    const channel = (conf.insecure)
+    ? createChannel(conf.endpoint, ChannelCredentials.createInsecure())
+    : createChannel(conf.endpoint, ChannelCredentials.createSsl(conf.cert));
+    
     let factory = createClientFactory();
     for (const interceptor of interceptors) {
         factory = factory.use(interceptor);
