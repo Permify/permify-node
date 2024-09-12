@@ -20,9 +20,10 @@ npm config set @buf:registry https://buf.build/gen/npm/v1/
 npm install @permify/permify-node
 ```
 
-Use yarn to install:
+Use yarn to install (Please be aware that Yarn versions greater than v1.10.0 and less than v2 are not supported):
 
 ```shell
+yarn config set npmScopes.buf.npmRegistryServer https://buf.build/gen/npm/v1/
 yarn add @permify/permify-node
 ```
 
@@ -40,7 +41,8 @@ request.setName("Tenant 1");
 
 const client = permify.grpc.newClient({
     endpoint: "localhost:3478",
-    cert: undefined
+    cert: undefined,
+    insecure: true
 });
 
 client.tenancy.create(request).then((response) => {
@@ -56,7 +58,8 @@ import * as permify from "@permify/permify-node";
 
 const client = permify.grpc.newClient({
     endpoint: "localhost:3478",
-    cert: undefined
+    cert: undefined,
+    insecure: true
 });
 
 // Define the schema
@@ -88,7 +91,8 @@ import * as permify from "@permify/permify-node";
 
 const client = permify.grpc.newClient({
     endpoint: "localhost:3478",
-    cert: undefined
+    cert: undefined,
+    insecure: true
 });
 
 // Create and set the RelationshipWriteRequest
@@ -142,7 +146,8 @@ import * as permify from "@permify/permify-node";
 
 const client = permify.grpc.newClient({
     endpoint: "localhost:3478",
-    cert: undefined
+    cert: undefined,
+    insecure: true
 });
 
 // Create and set the PermissionCheckRequest
@@ -183,7 +188,8 @@ import * as permify from "@permify/permify-node";
 function main() {
     const client = permify.grpc.newClient({
         endpoint: "localhost:3478",
-        cert: undefined
+        cert: undefined,
+        insecure: true
     });
 
     // Create and set the PermissionLookupEntityRequest
@@ -224,6 +230,8 @@ import * as permify from "@permify/permify-node";
 
 const client = new permify.grpc.newClient({
     endpoint: "localhost:3478",
+    cert: undefined,
+    insecure: true
 }, permify.grpc.newAccessTokenInterceptor("YOUR_TOKEN"))
 ```
 
@@ -238,6 +246,7 @@ const cert = fs.readFileSync('path/to/cert.pem');
 const client = new permify.grpc.newClient({
     endpoint: "localhost:3478",
     cert: cert,
+    insecure: true
 }, permify.grpc.newAccessTokenInterceptor("YOUR_TOKEN"))
 ```
 

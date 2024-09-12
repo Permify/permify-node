@@ -7,7 +7,8 @@ describe("clients test", () => {
         // Initialize the Permify gRPC client
         let client = permify.grpc.newClient({
             endpoint: "localhost:3478",
-            cert: undefined
+            cert: undefined,
+            insecure: true
         });
 
         // Define the schema
@@ -68,7 +69,8 @@ describe("clients test", () => {
         // Initialize the Permify gRPC client
         let client = permify.grpc.newClient({
             endpoint: "localhost:3478",
-            cert: undefined
+            cert: undefined,
+            insecure: true
         });
 
         // Create a BooleanValue message
