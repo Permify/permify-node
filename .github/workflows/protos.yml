@@ -49,13 +49,26 @@ jobs:
         rm -rf $TEMP_DIR
 
         echo "Successfully copied the proto directory to $TARGET_DIR."
+    
+    - name: Install Buf
+      run: |
+        # Download and install buf
+        wget https://github.com/bufbuild/buf/releases/download/v1.7.0/buf-Linux-x86_64 -O /usr/local/bin/buf
+        chmod +x /usr/local/bin/buf
+        buf --version
+
+    - name: Generate Code with Buf
+      run: |
+        # Navigate to the proto directory and run buf generate
+        buf generate
 
     - name: Add and Commit Changes
       run: |
         git config --global user.name 'GitHub Actions Bot'
         git config --global user.email '<>'
         git add proto
-        git commit -m "Update proto directory with latest changes"
+        git add src/grpc/generated
+        git commit -m "Update proto and generated sdk directory with latest changes"
 
     - name: Push Changes
       env:
