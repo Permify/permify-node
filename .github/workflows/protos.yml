@@ -16,7 +16,7 @@ jobs:
         #!/bin/bash
         REPO_URL="https://github.com/Permify/permify.git"
         TEMP_DIR="temp_dir"
-        TARGET_DIR="./proto"
+        TARGET_DIR="proto"
 
         # Clone the repository to a temporary directory
         git clone --depth=1 $REPO_URL $TEMP_DIR
