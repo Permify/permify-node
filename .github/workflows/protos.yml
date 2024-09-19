@@ -72,9 +72,8 @@ jobs:
       run: |
         git config --global user.name 'GitHub Actions Bot'
         git config --global user.email '<>'
-        git add proto
         git add src/grpc/generated
-        git commit -m "Update proto and generated sdk directory with latest changes"
+        git commit -m "Update generated sdk directory with latest changes"
 
     - name: Push Changes
       env:
