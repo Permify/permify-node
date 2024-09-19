@@ -24,6 +24,7 @@
   "author": "permify",
   "license": "Apache-2.0",
   "dependencies": {
+    "@bufbuild/protobuf": "^2.1.0",
     "nice-grpc": "^2.1.9"
   },
   "devDependencies": {
