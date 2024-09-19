@@ -3,6 +3,7 @@ name: Overwrite Proto Directory
 on:
   push:
     branches: [ "main" ]
+
 jobs:
   copy-proto:
     runs-on: ubuntu-latest
@@ -48,3 +49,16 @@ jobs:
         rm -rf $TEMP_DIR
 
         echo "Successfully copied the proto directory to $TARGET_DIR."
+
+    - name: Add and Commit Changes
+      run: |
+        git config --global user.name 'GitHub Actions Bot'
+        git config --global user.email '<>'
+        git add proto
+        git commit -m "Update proto directory with latest changes"
+
+    - name: Push Changes
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git push origin main
