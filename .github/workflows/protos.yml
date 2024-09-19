@@ -65,7 +65,7 @@ jobs:
     - name: Generate Code with Buf
       run: |
         # Navigate to the proto directory and run buf generate
-        npm install
+        npm install ts-proto
         buf generate
 
     - name: Add and Commit Changes
