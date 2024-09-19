@@ -16,14 +16,12 @@ This client makes it easy to interact with [Permify](https://github.com/Permify/
 Use npm to install:
 
 ```shell
-npm config set @buf:registry https://buf.build/gen/npm/v1/
 npm install @permify/permify-node
 ```
 
 Use yarn to install (Please be aware that Yarn versions greater than v1.10.0 and less than v2 are not supported):
 
 ```shell
-yarn config set npmScopes.buf.npmRegistryServer https://buf.build/gen/npm/v1/
 yarn add @permify/permify-node
 ```
 
@@ -34,18 +32,16 @@ yarn add @permify/permify-node
 ```typescript
 import * as permify from "@permify/permify-node";
 
-
-const request = new permify.grpc.payload.TenantCreateRequest();
-request.setId("t1");
-request.setName("Tenant 1");
-
 const client = permify.grpc.newClient({
     endpoint: "localhost:3478",
     cert: undefined,
     insecure: true
 });
 
-client.tenancy.create(request).then((response) => {
+client.tenancy.create({
+    id: "t1",
+    name: "Tenant 1"
+}).then((response) => {
     console.log(response);
     // handle response
 })
@@ -62,7 +58,6 @@ const client = permify.grpc.newClient({
     insecure: true
 });
 
-// Define the schema
 let schema = `
     entity user {}
     
@@ -73,13 +68,11 @@ let schema = `
     }
 `;
 
-// Create and set the SchemaWriteRequest
-let schemaWriteRequest = new permify.grpc.payload.SchemaWriteRequest();
-schemaWriteRequest.setTenantId("t1");
-schemaWriteRequest.setSchema(schema);
-
 // Write the schema
-client.schema.write(schemaWriteRequest).then((response) => {
+client.tenancy.create({
+    tenantId: "t1",
+    schema: schema
+}).then((response) => {
     // handle response
 })
 ```
@@ -95,14 +88,12 @@ const client = permify.grpc.newClient({
     insecure: true
 });
 
-// Create and set the RelationshipWriteRequest
-let relationshipWriteRequest = new permify.grpc.payload.SchemaWriteRequest();
-relationshipWriteRequest.setTenantId("t1");
-relationshipWriteRequest.setMetadata(new permify.grpc.payload.SchemaWriteRequestMetadata());
-
-// Create the tuple list
-let tupleList = [];
-let tuples = [{
+client.relationship.write({
+    tenantId: "t1",
+    metadata: {
+        schemaVersion: ""
+    },
+    tuples: [{
         entity: {
             type: "document",
             id: "1"
@@ -112,29 +103,8 @@ let tuples = [{
             type: "user",
             id: "1"
         }
-    }];
-
-tuples.forEach(t => {
-    let tuple = new permify.grpc.payload.Tuple();
-
-    let entity = new permify.grpc.payload.Entity();
-    entity.setType(t.entity.type);
-    entity.setId(t.entity.id);
-
-    let subject = new permify.grpc.payload.Subject();
-    subject.setType(t.subject.type);
-    subject.setId(t.subject.id);
-
-    tuple.setEntity(entity);
-    tuple.setRelation(t.relation);
-    tuple.setSubject(subject);
-
-    tupleList.push(tuple);
-});
-
-relationshipWriteRequest.setTuplesList(tupleList);
-
-client.relationship.write(relationshipWriteRequest).then((response) => {
+    }]
+}).then((response) => {
     // handle response
 })
 ```
@@ -150,34 +120,29 @@ const client = permify.grpc.newClient({
     insecure: true
 });
 
-// Create and set the PermissionCheckRequest
-let permissionCheckRequest = new permify.grpc.payload.PermissionCheckRequest();
-permissionCheckRequest.setTenantId("t1");
-permissionCheckRequest.setMetadata(new permify.grpc.payload.PermissionCheckRequestMetadata());
-
-// Set the entity details
-let permissionCheckRequestEntity = new permify.grpc.payload.Entity();
-permissionCheckRequestEntity.setType("document");
-permissionCheckRequestEntity.setId("1");
-permissionCheckRequest.setEntity(permissionCheckRequestEntity);
-
-// Set the permission to check
-permissionCheckRequest.setPermission("view");
-
-// Set the subject details
-let permissionCheckRequestSubject = new permify.grpc.payload.Subject();
-permissionCheckRequestSubject.setType("user");
-permissionCheckRequestSubject.setId("3");
-permissionCheckRequest.setSubject(permissionCheckRequestSubject);
-
-// Perform the permission check
-client.permission.check(permissionCheckRequest).then((response: permify.grpc.payload.PermissionCheckResponse) => {
-    if (response.can === permify.grpc.base.CheckResult.CHECK_RESULT_ALLOWED) {
+client.permission.check({
+    tenantId: "t1",
+    metadata: {
+        snapToken: "",
+        schemaVersion: "",
+        depth: 20
+    },
+    entity: {
+        type: "document",
+        id: "1"
+    },
+    permission: "view",
+    subject: {
+        type: "user",
+        id: "3"
+    }
+}).then((response) => {
+    if (response.can === PermissionCheckResponse_Result.RESULT_ALLOWED) {
         console.log("RESULT_ALLOWED")
     } else {
         console.log("RESULT_DENIED")
     }
-});
+})
 ```
 
 ### Streaming Calls
@@ -192,31 +157,27 @@ function main() {
         insecure: true
     });
 
-    // Create and set the PermissionLookupEntityRequest
-    let lookupEntityStreamRequest = new permify.grpc.payload.PermissionLookupEntityRequest();
-    lookupEntityStreamRequest.setTenantId("t1");
+    let res = client.permission.lookupEntityStream({
+        tenantId: "t1",
+        metadata: {
+            snapToken: "",
+            schemaVersion: "",
+            depth: 20
+        },
+        entityType: "document",
+        permission: "view",
+        subject: {
+            type: "user",
+            id: "1"
+        }
+    })
 
-    // Set the request metadata
-    lookupEntityStreamRequest.setMetadata(new permify.grpc.payload.PermissionLookupEntityRequestMetadata());
-
-    // Set the entity type and permission
-    lookupEntityStreamRequest.setEntityType("document");
-    lookupEntityStreamRequest.setPermission("view");
-
-    // Set the subject details
-    let subject = new permify.grpc.payload.Subject();
-    subject.setType("user");
-    subject.setId("1");
-    lookupEntityStreamRequest.setSubject(subject);
-
-    // Perform the lookup entity stream
-    const res = client.permission.lookupEntityStream(lookupEntityStreamRequest);
     handle(res)
 }
 
 async function handle(res: AsyncIterable<permify.grpc.payload.PermissionLookupEntityStreamResponse>) {
     for await (const response of res) {
-        // response.toObject().entityId
+        // response.entityId
     }
 }
 ```

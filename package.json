@@ -24,7 +24,6 @@
   "author": "permify",
   "license": "Apache-2.0",
   "dependencies": {
-    "@buf/permifyco_permify.grpc_node": "^1.12.4-20240722150440-5ee7aa4c5fb5.4",
     "nice-grpc": "^2.1.9"
   },
   "devDependencies": {

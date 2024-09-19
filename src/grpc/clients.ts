@@ -1,14 +1,13 @@
 import {ClientMiddleware, createChannel, createClientFactory, ChannelCredentials} from 'nice-grpc';
 
 import {
-    TenancyService, 
-    BundleService, 
-    DataService, 
-    WatchService, 
-    SchemaService, 
-    PermissionService
-} from '@buf/permifyco_permify.grpc_node/base/v1/service_grpc_pb';
-
+    PermissionDefinition,
+    SchemaDefinition,
+    DataDefinition,
+    TenancyDefinition,
+    WatchDefinition,
+    BundleDefinition
+} from './generated/base/v1/service';
 
 import {Config} from "./config";
 
@@ -32,11 +31,11 @@ export function newClient(conf: Config, ...interceptors: ClientMiddleware[]) {
         factory = factory.use(interceptor);
     }
     return {
-        permission: factory.create(PermissionService, channel),
-        schema: factory.create(SchemaService, channel),
-        data: factory.create(DataService, channel),
-        bundle: factory.create(BundleService, channel),
-        tenancy: factory.create(TenancyService, channel),
-        watch: factory.create(WatchService, channel)
+        permission: factory.create(PermissionDefinition, channel),
+        schema: factory.create(SchemaDefinition, channel),
+        data: factory.create(DataDefinition, channel),
+        bundle: factory.create(BundleDefinition, channel),
+        tenancy: factory.create(TenancyDefinition, channel),
+        watch: factory.create(WatchDefinition, channel)
     };
 }
