@@ -1,0 +1,50 @@
+name: Overwrite Proto Directory
+
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  copy-proto:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Run Bash Script to Overwrite Proto Directory
+      run: |
+        #!/bin/bash
+        REPO_URL="https://github.com/Permify/permify.git"
+        TEMP_DIR="temp_dir"
+        TARGET_DIR="./proto"
+
+        # Clone the repository to a temporary directory
+        git clone --depth=1 $REPO_URL $TEMP_DIR
+
+        # Check if the clone was successful
+        if [ $? -ne 0 ]; then
+            echo "Failed to clone repository."
+            exit 1
+        fi
+
+        # Remove the existing proto directory if it exists
+        if [ -d "$TARGET_DIR" ]; then
+            rm -rf $TARGET_DIR
+        fi
+
+        # Create the target directory and copy the specific directory to the desired location
+        mkdir -p $TARGET_DIR
+        cp -r $TEMP_DIR/proto/* $TARGET_DIR
+
+        # Check if the copy was successful
+        if [ $? -ne 0 ]; then
+            echo "Failed to copy the directory."
+            # Clean up the temporary repository directory
+            rm -rf $TEMP_DIR
+            exit 1
+        fi
+
+        # Clean up the temporary repository directory
+        rm -rf $TEMP_DIR
+
+        echo "Successfully copied the proto directory to $TARGET_DIR."
