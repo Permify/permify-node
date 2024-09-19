@@ -50,16 +50,22 @@ jobs:
 
         echo "Successfully copied the proto directory to $TARGET_DIR."
     
+    - name: Install Node.js and Dependencies
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18' 
+          
     - name: Install Buf
       run: |
         # Download and install buf
         wget https://github.com/bufbuild/buf/releases/download/v1.7.0/buf-Linux-x86_64 -O /usr/local/bin/buf
         chmod +x /usr/local/bin/buf
         buf --version
-
+        
     - name: Generate Code with Buf
       run: |
         # Navigate to the proto directory and run buf generate
+        npm install
         buf generate
 
     - name: Add and Commit Changes
