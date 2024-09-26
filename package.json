@@ -1,6 +1,6 @@
 {
   "name": "@permify/permify-node",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Permify Node Client",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
