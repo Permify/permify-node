@@ -8,6 +8,8 @@ describe("clients test", () => {
         let client = permify.grpc.newClient({
             endpoint: "localhost:3478",
             cert: undefined,
+            pk: undefined,
+            certChain: undefined,
             insecure: true
         });
 
@@ -57,6 +59,8 @@ describe("clients test", () => {
         let client = permify.grpc.newClient({
             endpoint: "localhost:3478",
             cert: undefined,
+            pk: undefined,
+            certChain: undefined,
             insecure: true
         });
 
