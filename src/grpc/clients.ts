@@ -24,7 +24,7 @@ import {Config} from "./config";
 export function newClient(conf: Config, ...interceptors: ClientMiddleware[]) {
     const channel = (conf.insecure)
     ? createChannel(conf.endpoint, ChannelCredentials.createInsecure())
-    : createChannel(conf.endpoint, ChannelCredentials.createSsl(conf.cert));
+    : createChannel(conf.endpoint, ChannelCredentials.createSsl(conf.cert, conf.pk, conf.certChain));
     
     let factory = createClientFactory();
     for (const interceptor of interceptors) {
