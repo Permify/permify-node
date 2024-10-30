@@ -72,8 +72,12 @@ jobs:
       run: |
         git config --global user.name 'GitHub Actions Bot'
         git config --global user.email '<>'
-        git add src/grpc/generated
-        git commit -m "Update generated sdk directory with latest changes"
+        git add src/grpc/generated package-lock.json package.json proto/
+        if git diff-index --quiet HEAD; then
+          echo "No changes to commit"
+        else
+          git commit -m "Update generated sdk directory with latest changes"
+        fi
 
     - name: Push Changes
       env:
