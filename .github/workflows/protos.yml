@@ -10,7 +10,7 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Run Bash Script to Overwrite Proto Directory
       run: |
@@ -51,7 +51,7 @@ jobs:
         echo "Successfully copied the proto directory to $TARGET_DIR."
     
     - name: Install Node.js and Dependencies
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '18' 
           
