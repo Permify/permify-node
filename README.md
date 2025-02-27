@@ -142,7 +142,7 @@ client.permission.check({
         id: "3"
     }
 }).then((response) => {
-    if (response.can === PermissionCheckResponse_Result.RESULT_ALLOWED) {
+    if (response.can === permify.grpc.base.CheckResult.CHECK_RESULT_ALLOWED) {
         console.log("RESULT_ALLOWED")
     } else {
         console.log("RESULT_DENIED")
