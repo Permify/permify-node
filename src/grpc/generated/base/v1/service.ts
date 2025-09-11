@@ -758,8 +758,8 @@ export interface TenantDeleteRequest {
 
 /** TenantDeleteResponse is the message returned from the request to delete a tenant. */
 export interface TenantDeleteResponse {
-  /** tenant is the tenant information that was deleted. */
-  tenant: Tenant | undefined;
+  /** tenant_id is the tenant id that was deleted. */
+  tenantId: string;
 }
 
 /** TenantListRequest is the message used for the request to list all tenants. */
@@ -6311,13 +6311,13 @@ export const TenantDeleteRequest: MessageFns<TenantDeleteRequest> = {
 };
 
 function createBaseTenantDeleteResponse(): TenantDeleteResponse {
-  return { tenant: undefined };
+  return { tenantId: "" };
 }
 
 export const TenantDeleteResponse: MessageFns<TenantDeleteResponse> = {
   encode(message: TenantDeleteResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.tenant !== undefined) {
-      Tenant.encode(message.tenant, writer.uint32(10).fork()).join();
+    if (message.tenantId !== "") {
+      writer.uint32(10).string(message.tenantId);
     }
     return writer;
   },
@@ -6334,7 +6334,7 @@ export const TenantDeleteResponse: MessageFns<TenantDeleteResponse> = {
             break;
           }
 
-          message.tenant = Tenant.decode(reader, reader.uint32());
+          message.tenantId = reader.string();
           continue;
         }
       }
@@ -6347,13 +6347,13 @@ export const TenantDeleteResponse: MessageFns<TenantDeleteResponse> = {
   },
 
   fromJSON(object: any): TenantDeleteResponse {
-    return { tenant: isSet(object.tenant) ? Tenant.fromJSON(object.tenant) : undefined };
+    return { tenantId: isSet(object.tenant_id) ? globalThis.String(object.tenant_id) : "" };
   },
 
   toJSON(message: TenantDeleteResponse): unknown {
     const obj: any = {};
-    if (message.tenant !== undefined) {
-      obj.tenant = Tenant.toJSON(message.tenant);
+    if (message.tenantId !== "") {
+      obj.tenant_id = message.tenantId;
     }
     return obj;
   },
@@ -6363,9 +6363,7 @@ export const TenantDeleteResponse: MessageFns<TenantDeleteResponse> = {
   },
   fromPartial(object: DeepPartial<TenantDeleteResponse>): TenantDeleteResponse {
     const message = createBaseTenantDeleteResponse();
-    message.tenant = (object.tenant !== undefined && object.tenant !== null)
-      ? Tenant.fromPartial(object.tenant)
-      : undefined;
+    message.tenantId = object.tenantId ?? "";
     return message;
   },
 };
