@@ -109,15 +109,18 @@ let schema = `
     }
 `;
 
-// Write the schema
-client.tenancy
-  .create({
-    tenantId: "t1",
-    schema: schema,
-  })
-  .then((response) => {
-    // handle response
-  });
+// Write the schema using the correct method
+client.schema.write({
+  tenantId: "t1",
+  schema: schema,
+})
+.then((response) => {
+  console.log("Schema written successfully:", response);
+  // handle response - typically contains schemaVersion
+})
+.catch((error) => {
+  console.error("Error writing schema:", error);
+});
 ```
 
 ### 4. Relationship Management
