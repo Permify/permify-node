@@ -3,6 +3,7 @@ name: Overwrite Proto Directory
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
 
 permissions:
   contents: read
@@ -10,85 +11,62 @@ permissions:
 jobs:
   copy-proto:
     permissions:
-      contents: write  # for Git to git push
+      contents: write  # Required for pushing changes back to the repository
     runs-on: ubuntu-latest
 
     steps:
+    # Security hardening for GitHub Actions runner
     - name: Harden Runner
       uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
       with:
         egress-policy: audit
 
+    # Checkout the current repository
     - name: Checkout Repository
       uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-    - name: Run Bash Script to Overwrite Proto Directory
+    # Clone Permify repo and copy proto files to our repo
+    - name: Copy Proto Files from Permify
       run: |
-        #!/bin/bash
-        REPO_URL="https://github.com/Permify/permify.git"
-        TEMP_DIR="temp_dir"
-        TARGET_DIR="proto"
+        git clone --depth=1 https://github.com/Permify/permify.git temp_dir
+        rm -rf proto
+        mkdir -p proto
+        cp -r temp_dir/proto/* proto
+        rm -rf temp_dir
 
-        # Clone the repository to a temporary directory
-        git clone --depth=1 $REPO_URL $TEMP_DIR
-
-        # Check if the clone was successful
-        if [ $? -ne 0 ]; then
-            echo "Failed to clone repository."
-            exit 1
-        fi
-
-        # Remove the existing proto directory if it exists
-        if [ -d "$TARGET_DIR" ]; then
-            rm -rf $TARGET_DIR
-        fi
-
-        # Create the target directory and copy the specific directory to the desired location
-        mkdir -p $TARGET_DIR
-        cp -r $TEMP_DIR/proto/* $TARGET_DIR
-
-        # Check if the copy was successful
-        if [ $? -ne 0 ]; then
-            echo "Failed to copy the directory."
-            # Clean up the temporary repository directory
-            rm -rf $TEMP_DIR
-            exit 1
-        fi
-
-        # Clean up the temporary repository directory
-        rm -rf $TEMP_DIR
-
-        echo "Successfully copied the proto directory to $TARGET_DIR."
-    
-    - name: Install Node.js and Dependencies
+    # Setup Node.js and install dependencies (including ts-proto)
+    - name: Setup Node.js
       uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
       with:
-        node-version: '18' 
-          
-    - name: Install Buf
-      run: |
-        # Download and install buf
-        wget https://github.com/bufbuild/buf/releases/download/v1.7.0/buf-Linux-x86_64 -O /usr/local/bin/buf
-        chmod +x /usr/local/bin/buf
-        buf --version
-        
-    - name: Generate Code with Buf
-      run: |
-        # Navigate to the proto directory and run buf generate
-        npm install ts-proto
-        buf generate
+        node-version: '18'
+        cache: 'npm'
 
+    - name: Install Dependencies
+      run: npm ci
+
+    # Install Buf CLI using official action
+    - name: Setup Buf
+      uses: bufbuild/buf-action@v1
+      with:
+        setup_only: true
+
+    # Generate TypeScript code from proto files
+    - name: Generate Code with Buf
+      run: buf generate
+
+    # Commit generated files if there are any changes
     - name: Add and Commit Changes
       run: |
         git config --global user.name 'GitHub Actions Bot'
         git config --global user.email '<>'
-        git add src/grpc/generated package-lock.json package.json proto/
+        git add src/grpc/generated proto/ package-lock.json
         if git diff-index --quiet HEAD; then
           echo "No changes to commit"
         else
           git commit -m "Update generated sdk directory with latest changes"
         fi
 
+    # Push changes back to main branch
     - name: Push Changes
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
