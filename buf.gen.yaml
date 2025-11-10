@@ -3,10 +3,15 @@ managed:
   enabled: true
 inputs:
   - module: buf.build/permifyco/permify
+    # Permify proto version - update this when upgrading
 plugins:
-  - remote: buf.build/community/timostamm-protobuf-ts:v2.9.1
+  - remote: buf.build/community/stephenh-ts-proto:v2.6.1
     out: src/grpc/generated
     opt:
-      - long_type_string
-      - client_grpc1
-      - generate_dependencies
+      - oneof=unions
+      - forceLong=long
+      - esModuleInterop=true
+      - env=node
+      - outputServices=nice-grpc
+      - outputServices=generic-definitions
+      - useExactTypes=false
