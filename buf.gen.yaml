@@ -1,6 +1,12 @@
-version: "v1"
+version: v2
+managed:
+  enabled: true
+inputs:
+  - module: buf.build/permifyco/permify
 plugins:
-  - name: ts-proto
-    out: "src/grpc/generated"
-    opt: oneof=unions,forceLong=long,esModuleInterop=true,env=node,outputServices=nice-grpc,outputServices=generic-definitions,useExactTypes=false
-    path: node_modules/.bin/protoc-gen-ts_proto
+  - remote: buf.build/community/timostamm-protobuf-ts:v2.9.1
+    out: src/grpc/generated
+    opt:
+      - long_type_string
+      - client_grpc1
+      - generate_dependencies
