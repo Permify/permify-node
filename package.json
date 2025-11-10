@@ -10,7 +10,8 @@
     "run-instance": "scripts/run-instance.sh",
     "run-test": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json",
     "lint": "eslint \"src/**/*.ts\"",
-    "build": "rm -rf ./dist && npx tsc"
+    "build": "rm -rf ./dist && npx tsc",
+    "buf:generate": "buf generate"
   },
   "keywords": [
     "permissions",
