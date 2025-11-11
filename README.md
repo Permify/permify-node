@@ -310,26 +310,10 @@ try {
 
 Contributions are welcome! Please read our [contributing guidelines](https://github.com/Permify/permify-node/CONTRIBUTING.md) to get started.
 
-## License
+## Communication Channels
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+If you like Permify, please consider giving us a :star:
 
-- [Permify playground](https://play.permify.co)
-- [Permify GitHub Repository](https://github.com/Permify/permify)
-
-## Community & Support
-
-Join our [Discord channel](https://discord.gg/MJbUjwskdH) for issues, feature requests, feedbacks or anything else. We
-love to talk about authorization and access control :heart:
-
-<p align="left">
-<a href="https://discord.gg/MJbUjwskdH">
- <img height="70px" width="70px" alt="permify | Discord" src="https://user-images.githubusercontent.com/39353278/187209316-3d01a799-c51b-4eaa-8f52-168047078a14.png" />
-</a>
-<a href="https://twitter.com/GetPermify">
-  <img height="70px" width="70px" alt="permify | Twitter" src="https://user-images.githubusercontent.com/39353278/187209323-23f14261-d406-420d-80eb-1aa707a71043.png"/>
-</a>
-<a href="https://www.linkedin.com/company/permifyco">
-  <img height="70px" width="70px" alt="permify | Linkedin" src="https://user-images.githubusercontent.com/39353278/187209321-03293a24-6f63-4321-b362-b0fc89fdd879.png" />
-</a>
-</p>
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/n6KfzYxhPp)&nbsp;&nbsp;
+[![X (Twitter)](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://twitter.com/GetPermify)&nbsp;&nbsp;
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/company/permifyco)
