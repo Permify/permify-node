@@ -12,6 +12,8 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "rootDir": "./",
+    "strict": false,
+    "strictNullChecks": false,
     "typeRoots": [
       "node_modules/@types"
     ]
