@@ -1,5 +1,4 @@
-import {ClientMiddleware, createChannel, createClientFactory, ChannelCredentials} from 'nice-grpc';
-
+import { ClientMiddleware, createChannel, createClientFactory, ChannelCredentials } from 'nice-grpc';
 import {
     PermissionDefinition,
     SchemaDefinition,
@@ -8,11 +7,10 @@ import {
     WatchDefinition,
     BundleDefinition
 } from './generated/base/v1/service';
-
-import {Config} from "./config";
+import { Config } from './config';
 
 /**
- * Create a new gRPC service client for of Permify.
+ * Create a new gRPC service client for Permify.
  * The client can be configured with multiple client interceptors. For authentication interceptors,
  * see the interceptors in this package.
  *
@@ -22,10 +20,10 @@ import {Config} from "./config";
  * @returns A new gRPC service client for the Permission API of Permify.
  */
 export function newClient(conf: Config, ...interceptors: ClientMiddleware[]) {
-    const channel = (conf.insecure)
-    ? createChannel(conf.endpoint, ChannelCredentials.createInsecure())
-    : createChannel(conf.endpoint, ChannelCredentials.createSsl(conf.cert, conf.pk, conf.certChain));
-    
+    const channel = conf.insecure
+        ? createChannel(conf.endpoint, ChannelCredentials.createInsecure())
+        : createChannel(conf.endpoint, ChannelCredentials.createSsl(conf.cert, conf.pk, conf.certChain));
+
     let factory = createClientFactory();
     for (const interceptor of interceptors) {
         factory = factory.use(interceptor);
