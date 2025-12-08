@@ -999,18 +999,18 @@ jackspeak@^3.1.2:
   optionalDependencies:
     "@pkgjs/parseargs" "^0.11.0"
 
-jasmine-core@~5.12.0:
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-5.12.1.tgz#17961990e04a7f7ffafa0e1488875cc9b9d51de3"
-  integrity sha512-P/UbRZ0LKwXe7wEpwDheuhunPwITn4oPALhrJEQJo6756EwNGnsK/TSQrWojBB4cQDQ+VaxWYws9tFNDuiMh2Q==
+jasmine-core@~5.13.0:
+  version "5.13.0"
+  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-5.13.0.tgz#3ff5765a93a23bac0728ae87ad82ce0569a5f7a8"
+  integrity sha512-vsYjfh7lyqvZX5QgqKc4YH8phs7g96Z8bsdIFNEU3VqXhlHaq+vov/Fgn/sr6MiUczdZkyXRC3TX369Ll4Nzbw==
 
 jasmine@^5.2.0:
-  version "5.12.0"
-  resolved "https://registry.yarnpkg.com/jasmine/-/jasmine-5.12.0.tgz#dc84b0caf8500b920faf13d6e611b0144513b480"
-  integrity sha512-KmKeTNuH8rgAuPRL5AUsXWSdJVlDu+pgqi2dLXoZUSH/g3kR+7Ho8B7hEhwDu0fu1PLuiXZtfaxmQ/mB5wqihw==
+  version "5.13.0"
+  resolved "https://registry.yarnpkg.com/jasmine/-/jasmine-5.13.0.tgz#9d43bf91cd6a2930b879fac67dc7448f5e24b96a"
+  integrity sha512-oLCXIhEb5e0zzjn9GyuvcuisvLBwUjmgz7a0RNGWKwQtJCDld4m+vwKUpAIJVLB5vbmQFdtKhT86/tIZlJ5gYw==
   dependencies:
     glob "^10.2.2"
-    jasmine-core "~5.12.0"
+    jasmine-core "~5.13.0"
 
 jest-diff@30.2.0:
   version "30.2.0"
