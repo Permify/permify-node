@@ -16,10 +16,10 @@
   resolved "https://registry.yarnpkg.com/@babel/helper-validator-identifier/-/helper-validator-identifier-7.28.5.tgz#010b6938fab7cb7df74aa2bbc06aa503b8fe5fb4"
   integrity sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q==
 
-"@bufbuild/protobuf@^2.0.0":
-  version "2.10.1"
-  resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-2.10.1.tgz#012f6d7d110f8c45198c7e6a96cb217c45d0c696"
-  integrity sha512-ckS3+vyJb5qGpEYv/s1OebUHDi/xSNtfgw1wqKZo7MR9F2z+qXr0q5XagafAG/9O0QPVIUfST0smluYSTpYFkg==
+"@bufbuild/protobuf@^2.0.0", "@bufbuild/protobuf@^2.10.2":
+  version "2.10.2"
+  resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-2.10.2.tgz#d7c063301f2a33095fc202f06bf3cce0c138dfcd"
+  integrity sha512-uFsRXwIGyu+r6AMdz+XijIIZJYpoWeYzILt5yZ2d3mCjQrWUTVpVD9WL/jZAbvp+Ed04rOhrsk7FiTcEDseB5A==
 
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
@@ -1482,22 +1482,22 @@ ts-poet@^6.12.0:
   dependencies:
     dprint-node "^1.0.8"
 
-ts-proto-descriptors@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/ts-proto-descriptors/-/ts-proto-descriptors-2.0.0.tgz#3a0e301a91cc6e932ac8dd13f7e07caa8a032c43"
-  integrity sha512-wHcTH3xIv11jxgkX5OyCSFfw27agpInAd6yh89hKG6zqIXnjW9SYqSER2CVQxdPj4czeOhGagNvZBEbJPy7qkw==
+ts-proto-descriptors@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/ts-proto-descriptors/-/ts-proto-descriptors-2.1.0.tgz#0c60525ea94748f7b3f394dc10d6eb8eeac4fe39"
+  integrity sha512-S5EZYEQ6L9KLFfjSRpZWDIXDV/W7tAj8uW7pLsihIxyr62EAVSiKuVPwE8iWnr849Bqa53enex1jhDUcpgquzA==
   dependencies:
     "@bufbuild/protobuf" "^2.0.0"
 
 ts-proto@^2.6.1:
-  version "2.8.3"
-  resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-2.8.3.tgz#8fe8c31edffacf7f04888031333a38efc9af8345"
-  integrity sha512-TdXInqG+61pj/TvORqITWjvjTTsL1EZxwX49iEj89+xFAcqPT8tjChpAGQXzfcF4MJwvNiuoCEbBOKqVf3ds3g==
+  version "2.10.1"
+  resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-2.10.1.tgz#0edb751a833e860c2400bce8ab309aff9cf09253"
+  integrity sha512-4sOE1hCs0uobJgdRCtcEwdbc8MAyKP+LJqUIKxZIiKac0rPBlVKsRGEGo2oQ1MnKA2Wwk0KuGP2POkiCwPtebw==
   dependencies:
-    "@bufbuild/protobuf" "^2.0.0"
+    "@bufbuild/protobuf" "^2.10.2"
     case-anything "^2.1.13"
     ts-poet "^6.12.0"
-    ts-proto-descriptors "2.0.0"
+    ts-proto-descriptors "2.1.0"
 
 type-check@^0.4.0, type-check@~0.4.0:
   version "0.4.0"
