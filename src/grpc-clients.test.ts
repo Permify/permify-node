@@ -170,13 +170,10 @@ describe("clients test", () => {
               },
             });
 
-            // Handle the stream response
-            handle(response2_3, ["1", "3", "4"]);
-
-            // Wait for the stream to complete
-            setTimeout(() => {
+            // Handle the stream response and wait for completion
+            handle(response2_3, ["1", "3", "4"]).then(() => {
               done();
-            }, 1000);
+            });
           });
       });
   });
