@@ -26,6 +26,22 @@ jobs:
        - name: Checkout Repository
          uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
+       # Checkout only the proto directory from the Permify repository
+       - name: Checkout Permify Proto Files
+         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+         with:
+           repository: Permify/permify
+           ref: master
+           sparse-checkout: proto
+           path: permify-repo
+
+       # Copy proto files into the local proto directory
+       - name: Copy Proto Files
+         run: |
+           rm -rf proto
+           cp -R permify-repo/proto/. proto/
+           rm -rf permify-repo
+
        # Setup Node.js
        - name: Setup Node.js
          uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
@@ -38,7 +54,7 @@ jobs:
        - name: Install Dependencies
          run: yarn install --frozen-lockfile --non-interactive
 
-       # Setup Buf CLI - will pull proto from buf.build/permifyco/permify
+       # Setup Buf CLI
        - name: Setup Buf
          run: |
            BUF_VERSION="1.57.0"
@@ -46,7 +62,7 @@ jobs:
            chmod +x "${RUNNER_TEMP}/buf"
            echo "${RUNNER_TEMP}" >> "${GITHUB_PATH}"
 
-       # Generate TypeScript code from Buf Schema Registry
+       # Generate TypeScript code from the downloaded proto files
        - name: Generate Code with Buf
          run: yarn buf:generate
 
