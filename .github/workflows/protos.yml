@@ -84,7 +84,7 @@ jobs:
            PR_BODY="Automatically created PR with the latest generated SDK from Permify proto definitions."
 
            echo "${BRANCH_NAME}"
-           git push "https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}" "${BRANCH_NAME}"
+           git push --force "https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}" "${BRANCH_NAME}"
 
            PR_NUMBER="$(gh pr list --head "${BRANCH_NAME}" --base main --state open --json number --jq '.[0].number')"
 
