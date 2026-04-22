@@ -1,0 +1,61 @@
+name: Auto Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'proto/**'
+      - 'src/**'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create SDK Release
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Create tag and release
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          PACKAGE_VERSION="$(sed -n 's/^[[:space:]]*"version":[[:space:]]*"\([^"]*\)".*/\1/p' package.json | head -n 1)"
+
+          if [ -z "${PACKAGE_VERSION}" ]; then
+            echo "Package version is empty. Skipping release creation."
+            exit 0
+          fi
+
+          TAG_NAME="v${PACKAGE_VERSION}"
+
+          if git rev-parse -q --verify "refs/tags/${TAG_NAME}" >/dev/null; then
+            echo "Tag ${TAG_NAME} already exists. Skipping release creation."
+            exit 0
+          fi
+
+          echo "Creating release ${TAG_NAME}"
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "<>"
+          git tag -a "${TAG_NAME}" -m "Release ${TAG_NAME}"
+          git push origin "${TAG_NAME}"
+
+          gh release create "${TAG_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "${TAG_NAME}" \
+            --generate-notes

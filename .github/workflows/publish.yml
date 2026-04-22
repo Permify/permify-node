@@ -29,6 +29,9 @@ jobs:
 
       - name: Build
         run: yarn build
+
+      - name: Run tests
+        run: yarn run-instance
       
       - name: Write release version
         run: |
@@ -36,7 +39,7 @@ jobs:
           echo Version: $VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
       
-      - run: "npm version ${VERSION} --no-git-tag-version"
+      - run: "npm version ${VERSION} --no-git-tag-version --allow-same-version"
       
       - name: Publish to NPM
         run: npm publish --access public

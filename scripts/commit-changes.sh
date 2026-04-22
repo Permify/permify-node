@@ -4,7 +4,7 @@ set -euo pipefail
 
 branch_name="${1:?branch name is required}"
 
-if git diff --quiet; then
+if [[ -z "$(git status --porcelain)" ]]; then
   echo "changes_made=0" >> "${GITHUB_OUTPUT}"
   echo "No changes detected"
   exit 0
