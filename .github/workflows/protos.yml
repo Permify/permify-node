@@ -1,9 +1,12 @@
 name: Update Permify Proto Definitions
 
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version from the Permify repo (for example v1.6.9)"
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -66,6 +69,18 @@ jobs:
        - name: Generate Code with Buf
          run: yarn buf:generate
 
+       - name: Write package version
+         if: ${{ github.event.inputs.version != '' }}
+         run: npm version "${VERSION#v}" --no-git-tag-version --allow-same-version
+         env:
+           VERSION: ${{ github.event.inputs.version }}
+
+       - name: Build
+         run: yarn build
+
+       - name: Run tests
+         run: yarn run-instance
+
        - name: Commit changes
          id: commitchanges
          run: |
@@ -91,6 +106,17 @@ jobs:
            if [ -n "${PR_NUMBER}" ]; then
              gh pr edit "${PR_NUMBER}" --title "${PR_TITLE}" --body "${PR_BODY}"
            else
-             gh pr create --base main --head "${BRANCH_NAME}" --title "${PR_TITLE}" --body "${PR_BODY}" --label dependencies --label automated
+             CREATE_ARGS=(--base main --head "${BRANCH_NAME}" --title "${PR_TITLE}" --body "${PR_BODY}")
+             LABELS="$(gh label list --json name --jq '.[].name' || true)"
+
+             if printf '%s\n' "${LABELS}" | grep -qx 'dependencies'; then
+               CREATE_ARGS+=(--label dependencies)
+             fi
+
+             if printf '%s\n' "${LABELS}" | grep -qx 'automated'; then
+               CREATE_ARGS+=(--label automated)
+             fi
+
+             gh pr create "${CREATE_ARGS[@]}"
            fi
          shell: bash

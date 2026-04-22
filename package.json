@@ -13,6 +13,7 @@
   ],
   "scripts": {
     "run-instance": "scripts/run-instance.sh",
+    "test": "yarn run-test",
     "run-test": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json",
     "lint": "eslint \"src/**/*.ts\"",
     "build": "rm -rf ./dist && npx tsc && cp -r src/grpc/generated dist/src/grpc/",
