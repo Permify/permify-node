@@ -475,10 +475,10 @@
     "@typescript-eslint/types" "8.46.4"
     eslint-visitor-keys "^4.2.1"
 
-abort-controller-x@^0.4.0:
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/abort-controller-x/-/abort-controller-x-0.4.3.tgz#ff269788386fabd58a7b6eeaafcb6cf55c2958e0"
-  integrity sha512-VtUwTNU8fpMwvWGn4xE93ywbogTYsuT+AUxAXOeelbXuQVIwNmC5YLeho9sH4vZ4ITW8414TTAOG1nW6uIVHCA==
+abort-controller-x@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/abort-controller-x/-/abort-controller-x-0.5.0.tgz#2c0531a83c7717eccd47435bfe123bccfd34e2b8"
+  integrity sha512-yTt9CI0x+nRfX6BFMenEGP8ooPvErGH6AbFz20C2IeOLIlDsrw/VHpgne3GsCEuTA410IiFiaLVFKmgM4bKEPQ==
 
 acorn-jsx@^5.3.2:
   version "5.3.2"
@@ -1162,21 +1162,21 @@ natural-compare@^1.4.0:
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==
 
-nice-grpc-common@^2.0.0, nice-grpc-common@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/nice-grpc-common/-/nice-grpc-common-2.0.2.tgz#e6aeebb2bd19d87114b351e291e30d79dd38acf7"
-  integrity sha512-7RNWbls5kAL1QVUOXvBsv1uO0wPQK3lHv+cY1gwkTzirnG1Nop4cBJZubpgziNbaVc/bl9QJcyvsf/NQxa3rjQ==
+nice-grpc-common@^2.0.0, nice-grpc-common@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/nice-grpc-common/-/nice-grpc-common-2.0.3.tgz#f55b2cb438f4882b8603d0d9fad44d3bae6f86a8"
+  integrity sha512-MEhnD3JMah0mgyivpb9hpRDbOBuXBxI/TVO+OK1h6rC97WM42HsPMR+zzRNQ0C5BqYJTw1nyWiQRD0DucO+pjQ==
   dependencies:
     ts-error "^1.0.6"
 
 nice-grpc@^2.1.9:
-  version "2.1.13"
-  resolved "https://registry.yarnpkg.com/nice-grpc/-/nice-grpc-2.1.13.tgz#934e0ca733ea91fae9200689a031d4987c1b7004"
-  integrity sha512-IkXNok2NFyYh0WKp1aJFwFV3Ue2frBkJ16ojrmgX3Tc9n0g7r0VU+ur3H/leDHPPGsEeVozdMynGxYT30k3D/Q==
+  version "2.1.16"
+  resolved "https://registry.yarnpkg.com/nice-grpc/-/nice-grpc-2.1.16.tgz#10f335eeb8c9c5aca85cc04e618a9e86c9d6b4fa"
+  integrity sha512-Cl3Pn00212Hl8/U6bpgMxmhZj5lyv3nWoJov4cd3FjWarktrMHP4DNvSjCnDwkMWYx4W1tyscEia4JX6Y4GVCQ==
   dependencies:
     "@grpc/grpc-js" "^1.14.0"
-    abort-controller-x "^0.4.0"
-    nice-grpc-common "^2.0.2"
+    abort-controller-x "^0.5.0"
+    nice-grpc-common "^2.0.3"
 
 optionator@^0.9.3:
   version "0.9.4"
