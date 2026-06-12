@@ -86,14 +86,18 @@ yarn buf:generate
 
 ## Configuration
 
-### Required Secrets
+### Trusted Publisher
 
-Set in GitHub repository settings:
+Publishing uses npm trusted publishing, so no long-lived npm publish token is required.
 
-- **NPM_TOKEN**: Authentication token for publishing to NPM
-  - Create at [npmjs.com](https://www.npmjs.com/) → Access Tokens
-  - Type: **Automation**
-  - Permission: **Read and Write**
+Configure the trusted publisher in the npm package settings:
+
+- **Publisher**: GitHub Actions
+- **Organization or user**: `Permify`
+- **Repository**: `permify-node`
+- **Workflow filename**: `publish.yml`
+- **Allowed actions**: `npm publish`
+- **Environment name**: leave empty unless `.github/workflows/publish.yml` is updated to use a matching GitHub environment
 
 ## Workflows
 
@@ -103,11 +107,11 @@ Set in GitHub repository settings:
 
 **Steps**:
 1. Checkout code
-2. Setup Node.js 20
+2. Setup Node.js with npm trusted publishing support
 3. Install dependencies
 4. Build (`yarn build`)
 5. Update version
-6. Publish to NPM
+6. Publish to NPM using GitHub OIDC
 
 ### 2. Proto Update Workflow (`.github/workflows/protos.yml`)
 
@@ -129,7 +133,8 @@ yarn build
 
 ### Publish Failed
 
-- Check if `NPM_TOKEN` is valid
+- Verify the npm trusted publisher settings match `Permify/permify-node` and `publish.yml`
+- Check that the workflow has `id-token: write` permission
 - Verify version doesn't already exist on NPM
 - Check [Actions logs](https://github.com/Permify/permify-node/actions)
 
@@ -159,11 +164,10 @@ Before releasing:
 - [ ] Version number follows semantic versioning
 - [ ] Release notes prepared
 - [ ] Breaking changes documented (if any)
-- [ ] NPM_TOKEN is valid
+- [ ] npm trusted publisher is configured for `.github/workflows/publish.yml`
 
 ## Links
 
 - [NPM Package](https://www.npmjs.com/package/@permify/permify-node)
 - [GitHub Repository](https://github.com/Permify/permify-node)
 - [Buf Schema Registry](https://buf.build/permifyco/permify)
-

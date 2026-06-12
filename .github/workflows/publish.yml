@@ -5,6 +5,10 @@ on:
     types:
       - "published"
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   publish:
     name: Publish to NPM
@@ -19,10 +23,12 @@ jobs:
       
       - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
-          cache-dependency-path: ./yarn.lock
-          cache: "yarn"
-          node-version: 20
+          node-version: 22.14.0
           registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+
+      - name: Install npm with trusted publishing support
+        run: npm install --global npm@^11.5.1
       
       - name: Install dependencies
         run: yarn install --frozen-lockfile --non-interactive
@@ -43,5 +49,3 @@ jobs:
       
       - name: Publish to NPM
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
