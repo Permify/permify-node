@@ -58,9 +58,10 @@ import * as permify from "@permify/permify-node";
 
 const client = permify.grpc.newClient({
   endpoint: "localhost:3478", // Replace with your Permify server URL
-  cert: undefined, // Optional: SSL certificate
+  cert: null, // Optional: SSL certificate
   insecure: true, // Set to false in production
-  timeout: 5000, // Request timeout in milliseconds
+  pk: null, // Optional: The client private key
+  certChain: null // Optional: The client certificate key chain
 });
 ```
 
@@ -71,8 +72,10 @@ import * as permify from "@permify/permify-node";
 
 const client = permify.grpc.newClient({
   endpoint: "localhost:3478",
-  cert: undefined,
+  cert: null,
   insecure: true,
+  pk: null,
+  certChain: null
 });
 
 client.tenancy
@@ -95,8 +98,10 @@ import * as permify from "@permify/permify-node";
 
 const client = permify.grpc.newClient({
   endpoint: "localhost:3478",
-  cert: undefined,
+  cert: null,
   insecure: true,
+  pk: null,
+  certChain: null
 });
 
 let schema = `
@@ -132,11 +137,13 @@ import * as permify from "@permify/permify-node";
 
 const client = permify.grpc.newClient({
   endpoint: "localhost:3478",
-  cert: undefined,
+  cert: null,
   insecure: true,
+  pk: null,
+  certChain: null
 });
 
-client.relationship
+client.data
   .write({
     tenantId: "t1",
     metadata: {
@@ -170,8 +177,10 @@ import * as permify from "@permify/permify-node";
 
 const client = permify.grpc.newClient({
   endpoint: "localhost:3478",
-  cert: undefined,
+  cert: null,
   insecure: true,
+  pk: null,
+  certChain: null
 });
 
 client.permission
@@ -213,8 +222,10 @@ import * as permify from "@permify/permify-node";
 function main() {
   const client = permify.grpc.newClient({
     endpoint: "localhost:3478",
-    cert: undefined,
+    cert: null,
     insecure: true,
+    pk: null,
+    certChain: null
   });
 
   let res = client.permission.lookupEntityStream({
@@ -254,8 +265,10 @@ import * as permify from "@permify/permify-node";
 const client = new permify.grpc.newClient(
   {
     endpoint: "localhost:3478",
-    cert: undefined,
+    cert: null,
     insecure: true,
+    pk: null,
+    certChain: null
   },
   permify.grpc.newAccessTokenInterceptor("YOUR_TOKEN")
 );
@@ -274,6 +287,8 @@ const client = new permify.grpc.newClient(
     endpoint: "localhost:3478",
     cert: cert,
     insecure: true,
+    pk: null,
+    certChain: null
   },
   permify.grpc.newAccessTokenInterceptor("YOUR_TOKEN")
 );
