@@ -137,10 +137,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/retry/-/retry-0.4.3.tgz#c2b9d2e374ee62c586d3adbea87199b1d7a7a6ba"
   integrity sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==
 
-"@jasminejs/reporters@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@jasminejs/reporters/-/reporters-1.0.0.tgz#1d06099c11ff9793544e6d84ad8fb45c37630a60"
-  integrity sha512-rM3GG4vx2H1Gp5kYCTr9aKlOEJFd43pzpiMAiy5b1+FUc2ub4e6bS6yCi/WQNDzAa5MVp9++dwcoEtcIfoEnhA==
+"@jasminejs/reporters@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@jasminejs/reporters/-/reporters-1.1.0.tgz#46e2e69950097c2475e95e84e85824d1cf83c9a3"
+  integrity sha512-JIrlfaf9c6m0+GtBAgZdcFB6RIRbFBbXxZDZ0WOewq4cLIEcVKEe0RgI1FA77M39FNzeSMTAm+LK/kcQVIkfGQ==
 
 "@jest/diff-sequences@30.0.1":
   version "30.0.1"
@@ -959,19 +959,19 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
 
-jasmine-core@~6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-6.1.0.tgz#20d924c5570f002d7515c6c45bd49b9715fea43d"
-  integrity sha512-p/tjBw58O6vxKIWMlrU+yys8lqR3+l3UrqwNTT7wpj+dQ7N4etQekFM8joI+cWzPDYqZf54kN+hLC1+s5TvZvg==
+jasmine-core@~7.0.0:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-7.0.2.tgz#afee5b1edd630c714b3b064193756d28f201a317"
+  integrity sha512-YMVijt84KPQQFm1db1AQAxTXfq0k3wU06OkepLViljURFqiRQ7EYYX2eUAshhUv9fA9t1E2N65GrdqvupA9VPQ==
 
-jasmine@^6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/jasmine/-/jasmine-6.1.0.tgz#6cbdabdc6ffee59773c0b7e77cf7e058a2f6c63b"
-  integrity sha512-WPphPqEMY0uBRMjuhRHoVoxQNvJuxIMqz0yIcJ3k3oYxBedeGoH60/NXNgasxnx2FvfXrq5/r+2wssJ7WE8ABw==
+jasmine@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/jasmine/-/jasmine-7.0.0.tgz#2df083e74d9f079b1b51bcfc4545d569b968b9b8"
+  integrity sha512-rnjiyg1LAhFZMoyU8ei/Wqyvti5oCzFhW7ZtkD6o+CSx3LpU9aYurPrh5BKyX3coGvmdEVYPC2HYh1rrBvZoWg==
   dependencies:
-    "@jasminejs/reporters" "^1.0.0"
+    "@jasminejs/reporters" "^1.1.0"
     glob "^10.2.2 || ^11.0.3 || ^12.0.0 || ^13.0.0"
-    jasmine-core "~6.1.0"
+    jasmine-core "~7.0.0"
 
 jest-diff@30.2.0:
   version "30.2.0"
